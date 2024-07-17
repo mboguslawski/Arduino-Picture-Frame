@@ -1,0 +1,9 @@
+[submodule "lib/XPT2046_Touchscreen"]
+	path = lib/XPT2046_Touchscreen
+	url = git@github.com:PaulStoffregen/XPT2046_Touchscreen.git
+[submodule "lib/ILI9486"]
+	path = lib/ILI9486
+	url = git@github.com:mboguslawski/ILI9486.git
+[submodule "lib/SD"]
+	path = lib/SD
+	url = git@github.com:arduino-libraries/SD.git
