@@ -29,6 +29,8 @@ ILI9486 *display;
 XPT2046_Touchscreen *touch;
 Calibration *calibration;
 
+void clear();
+
 void setup() {
 	Serial.begin(9600);
 
@@ -38,6 +40,8 @@ void setup() {
 	calibration = new Calibration(true, display, touch);
 
 	calibration->calibrate(X_BEGIN, X_END, Y_BEGIN, Y_END);
+
+	clear();
 }
 
 void loop() {
@@ -45,15 +49,27 @@ void loop() {
 		if (touch->touched()) {
 			TS_Point p = touch->getPoint();
 			calibration->translate(p);
-			display->drawCircle(p.x, p.y, 5, ILI9486_WHITE, true);
-			Serial.print("Pressure = ");
-			Serial.print(p.z);
-			Serial.print(", x = ");
-			Serial.print(p.x);
-			Serial.print(", y = ");
-			Serial.print(p.y);
-			delay(100);
-			Serial.println();
+
+			if (p.y >= 400) {
+				clear();
+			} else {
+
+				display->drawCircle(p.x, p.y, 5, ILI9486_WHITE, true);
+				Serial.print("Pressure = ");
+				Serial.print(p.z);
+				Serial.print(", x = ");
+				Serial.print(p.x);
+				Serial.print(", y = ");
+				Serial.print(p.y);
+				delay(100);
+				Serial.println();
+			}
 		}
 	}
+}
+
+void clear() {
+	display->clear();
+	display->drawHLine(0, 400, display->getWidth(), ILI9486_WHITE);
+	display->drawString(10, 440, "Clear", ILI9486::L, ILI9486_WHITE);
 }
