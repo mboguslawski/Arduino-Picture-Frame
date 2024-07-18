@@ -20,6 +20,11 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 #include "Calibration.h"
 
+#define X_BEGIN 555
+#define X_END 3551
+#define Y_BEGIN 3783
+#define Y_END 392
+
 ILI9486 *display;
 XPT2046_Touchscreen *touch;
 Calibration *calibration;
@@ -32,22 +37,23 @@ void setup() {
 	touch->begin();
 	calibration = new Calibration(true, display, touch);
 
-	calibration->calibrate();
+	calibration->calibrate(X_BEGIN, X_END, Y_BEGIN, Y_END);
 }
 
 void loop() {
 	if (touch->tirqTouched()) {
-    if (touch->touched()) {
-      TS_Point p = touch->getPoint();
-	  calibration->translate(p);
-      Serial.print("Pressure = ");
-      Serial.print(p.z);
-	  Serial.print(", x = ");
-      Serial.print(p.x);
-      Serial.print(", y = ");
-      Serial.print(p.y);
-      delay(30);
-      Serial.println();
-    }
-  }
+		if (touch->touched()) {
+			TS_Point p = touch->getPoint();
+			calibration->translate(p);
+			display->drawCircle(p.x, p.y, 5, ILI9486_WHITE, true);
+			Serial.print("Pressure = ");
+			Serial.print(p.z);
+			Serial.print(", x = ");
+			Serial.print(p.x);
+			Serial.print(", y = ");
+			Serial.print(p.y);
+			delay(100);
+			Serial.println();
+		}
+	}
 }

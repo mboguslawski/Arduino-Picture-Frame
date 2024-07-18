@@ -37,7 +37,7 @@ void Calibration::calibrate() {
     const uint16_t size = 20;
     
     constexpr uint16_t touchDelay = 200;
-    constexpr uint16_t repeat = 3;
+    constexpr uint16_t repeat = 10;
 
     // 0-left bottom, 1-right bottom, 2-left up, 3-left up
     uint16_t positions[4][2] = {{left, bottom}, {right, bottom}, {left, up}, {right, up}};
