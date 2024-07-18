@@ -22,65 +22,87 @@ Calibration::Calibration(bool swapxy, ILI9486 *display, XPT2046_Touchscreen *tou
     swapxy(swapxy),
     display(display),
     touch(touch),
-    xEq(1, 0),
-    yEq(1, 0)
+    xBegin(0),
+    xEnd(0),
+    yBegin(0),
+    yEnd(0)
 {}
 
 void Calibration::calibrate() {
-    display->clear(ILI9486_BLACK);
-    
     // Coordinates of points to display
-    constexpr uint16_t p1x = 40;
-    constexpr uint16_t p1y = 40;
-    const uint16_t p2x = this->display->getWidth() - 40;
-    const uint16_t p2y = this->display->getHeight() - 40;
-    constexpr uint16_t size = 20;
+    const uint16_t left = 40;
+    const uint16_t right = this->display->getWidth() - 40;
+    const uint16_t bottom = 40;
+    const uint16_t up = this->display->getHeight() - 40;
+    const uint16_t size = 20;
     
-    // Draw first point
-    delay(200);
-    display->drawCircle(p1x, p1y, size, ILI9486_WHITE, true);
-    
-    // Wait for touch
-	while (!touch->tirqTouched() || !touch->touched()) {}
+    constexpr uint16_t touchDelay = 200;
+    constexpr uint16_t repeat = 3;
 
-    // Get raw touch panel position 
-	TS_Point t1 = touch->getPoint();
-    
-    // Display second point 
-	delay(200);
-	display->drawCircle(p2x, p2y, size, ILI9486_WHITE, true);
-	
-    // Wait for touch
-	while (!touch->tirqTouched() || !touch->touched()) {}
+    // 0-left bottom, 1-right bottom, 2-left up, 3-left up
+    uint16_t positions[4][2] = {{left, bottom}, {right, bottom}, {left, up}, {right, up}};
+    TS_Point points[4];
 
-    // Get raw touch panel position
-	TS_Point t2 = touch->getPoint();
 
-    // Swap x nad y coordinates if needed
-    if (this->swapxy) {
-        swapXY(t1);
-        swapXY(t2);
+    // Draw points one by one
+    display->clear(ILI9486_BLACK);
+    for (uint8_t i = 0; i < 4; i++) {
+
+        display->drawCircle(positions[i][0], positions[i][1], size, ILI9486_WHITE, true);
+        
+        // Repeat measure
+        uint16_t x = 0, y = 0;
+        for (uint8_t j = 0; j < repeat; j++) {
+            delay(touchDelay);
+            while (!touch->tirqTouched() || !touch->touched()) {} // Wait for touch
+
+            TS_Point p = touch->getPoint();
+            x += p.x;
+            y += p.y;
+        }
+
+        display->drawCircle(positions[i][0], positions[i][1], size, ILI9486_BLACK, true);
+
+        // Set point coordinates as average
+        points[i].x = x / repeat;
+        points[i].y = y / repeat;
+
+        if (swapxy) { swapXY(points[i]); }
     }
 
-    // Calculate values used for translation
-	this->xEq.m = (double)(p2x - p1x) / (double)(t2.x - t1.x);
-	this->xEq.c = (double)p1x - this->xEq.m * (double)t1.x;
-	this->yEq.m = (double)(p2y - p1y) / (double)(t2.y - t1.y);
-	this->yEq.c = (double)p1y - this->yEq.m * (double)t1.y;
+    uint16_t xb = (points[0].x + points[2].x) / 2;
+    uint16_t xe = (points[1].x + points[3].x) / 2;
+    uint16_t yb = (points[0].y + points[1].y) / 2;
+    uint16_t ye = (points[2].y + points[3].y) / 2;
+
+
+    this->xBegin = map(0, positions[0][0], positions[1][0], xb, xe);
+    this->xEnd = map(this->display->getWidth() - 1, positions[0][0], positions[1][0], xb, xe);
+
+    this->yBegin = map(0, positions[0][1], positions[2][1], yb, ye);
+    this->yEnd = map(this->display->getHeight() - 1, positions[0][1], positions[2][1], yb, ye);
+
 
     // Print calibration values
     if (Serial) {
-        Serial.print("mx = ");
-        Serial.println(xEq.m);
-        Serial.print("cx = ");
-        Serial.println(xEq.c);
-        Serial.print("my = ");
-        Serial.println(yEq.m);
-        Serial.print("cy = ");
-        Serial.println(yEq.c);
+        Serial.print("xBegin = ");
+        Serial.println(xBegin);
+        Serial.print("xEnd = ");
+        Serial.println(xEnd);
+        Serial.print("yBegin = ");
+        Serial.println(yBegin);
+        Serial.print("yEnd = ");
+        Serial.println(yEnd);
     }
 
     display->clear();
+}
+
+void Calibration::calibrate(uint16_t xBegin, uint16_t xEnd, uint16_t yBegin, uint16_t yEnd) {
+    this->xBegin = xBegin;
+    this->xEnd = xEnd;
+    this->yBegin = yBegin;
+    this->yEnd = yEnd;
 }
 
 void Calibration::translate(TS_Point &point) {
@@ -88,8 +110,8 @@ void Calibration::translate(TS_Point &point) {
         swapXY(point);
     }
 
-    point.x = xEq.calculate(point.x);
-    point.y = yEq.calculate(point.y);
+    point.x = map(point.x, xBegin, xEnd, 0, this->display->getWidth() - 1);
+    point.y = map(point.y, yBegin, yEnd, 0, this->display->getHeight() - 1);
 }
 
 void Calibration::swapXY(TS_Point &point) {

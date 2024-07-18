@@ -21,19 +21,12 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #include <ILI9486.h>
 #include <XPT2046_Touchscreen.h>
 
-struct LinearEquation {
-    LinearEquation(double m, double c): m(m), c(c) {}
-    double m;
-    double c;
-    double calculate(double x) { return x * m + c; }
-};
-
 class Calibration {
 public:
     Calibration(bool swapxy, ILI9486 *display, XPT2046_Touchscreen *touch);
 
     void calibrate(); // Display two points on screen to calibrate
-    void calibrate(double mx, double cx, double my, double cy); // Used to pass consts to avoid calibration on each startup 
+    void calibrate(uint16_t xBegin, uint16_t xEnd, uint16_t yBegin, uint16_t yEnd); // Used to pass consts to avoid calibration on each startup 
 
     void translate(TS_Point &point); // Translate x and y position to match calibration
 
@@ -41,8 +34,10 @@ private:
     bool swapxy; // Store need for swapping x and y coordinates in portrait orientations
     ILI9486 *display;
     XPT2046_Touchscreen *touch;
-    LinearEquation xEq; // Used to translate x position
-    LinearEquation yEq; // Used to translate y position
+    uint16_t xBegin;
+    uint16_t xEnd;
+    uint16_t yBegin;
+    uint16_t yEnd;
 
     void swapXY(TS_Point &point); // Swap x coordinate with y coordinate
 };
