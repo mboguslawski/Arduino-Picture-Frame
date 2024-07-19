@@ -27,6 +27,11 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 #define BUFFER_SIZE 100
 
+#define DISPLAY_TIME 5000 // 5 seconds
+
+#define TP_CS 4
+#define TP_IRQ 3
+
 ILI9486 *display;
 XPT2046_Touchscreen *touch;
 Calibration *calibration;
@@ -39,7 +44,7 @@ void setup() {
 	digitalWrite(4, 1);
 	storage = new SDStorage(5, display->getWidth(), display->getHeight(), "/");
 	
-	touch = new XPT2046_Touchscreen(4, 3);
+	touch = new XPT2046_Touchscreen(TP_CS, TP_IRQ);
 	touch->begin();
 	
 	calibration = new Calibration(true, display, touch);
@@ -58,5 +63,5 @@ void loop() {
 
 	display->drawString(10, 460, (uint8_t*)storage->getCurrentImage().name(), ILI9486::L, ILI9486_BLACK);
 
-	delay(1000);
+	delay(DISPLAY_TIME);
 }
