@@ -51,7 +51,7 @@ void loop() {
 	storage->nextImage();
 
 	display->openWindow(0, 0, display->getWidth(), display->getHeight());
-	for (uint32_t i = 0; i < (uint32_t)display->getWidth() * (uint32_t)display->getHeight() / BUFFER_SIZE; i++) {
+	for (uint32_t i = 0; i < display->getSize() / BUFFER_SIZE; i++) {
 		storage->readImagePortion(buffer, BUFFER_SIZE);
 		display->writeBuffer(buffer, BUFFER_SIZE);
 	}
