@@ -20,9 +20,9 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #include "SDStorage.h"
 
 SDStorage::SDStorage(uint8_t SD_CS_PIN, uint16_t disWidth, uint16_t disHeight, String imageDir):
-    disHeight(disHeight),
+    initialized(false),
     disWidth(disWidth),
-    initialized(false)
+    disHeight(disHeight)
 {
     // Initialize SD card
     pinMode(SD_CS_PIN, OUTPUT);
