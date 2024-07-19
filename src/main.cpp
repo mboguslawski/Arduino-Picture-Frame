@@ -16,8 +16,8 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #include <Arduino.h>
 #include <ILI9486.h>
 #include <XPT2046_Touchscreen.h>
-#include <SD.h>
 
+#include "SDStorage.h"
 #include "Calibration.h"
 
 #define X_BEGIN 555
@@ -25,51 +25,37 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #define Y_BEGIN 3783
 #define Y_END 392
 
+#define BUFFER_SIZE 100
+
 ILI9486 *display;
 XPT2046_Touchscreen *touch;
 Calibration *calibration;
-
-void clear();
+SDStorage *storage;
 
 void setup() {
-	Serial.begin(9600);
-
 	display = new ILI9486(ILI9486::R2L_U2D);
+	
+	digitalWrite(ILI9486_CS, 1);
+	digitalWrite(4, 1);
+	storage = new SDStorage(5, display->getWidth(), display->getHeight(), "/");
+	
 	touch = new XPT2046_Touchscreen(4, 3);
 	touch->begin();
+	
 	calibration = new Calibration(true, display, touch);
-
 	calibration->calibrate(X_BEGIN, X_END, Y_BEGIN, Y_END);
-
-	clear();
 }
 
 void loop() {
-	if (touch->tirqTouched()) {
-		if (touch->touched()) {
-			TS_Point p = touch->getPoint();
-			calibration->translate(p);
+	uint16_t buffer[BUFFER_SIZE];
+	storage->nextImage();
 
-			if (p.y >= 400) {
-				clear();
-			} else {
+	uint32_t time = millis();
 
-				display->drawCircle(p.x, p.y, 5, ILI9486_WHITE, true);
-				Serial.print("Pressure = ");
-				Serial.print(p.z);
-				Serial.print(", x = ");
-				Serial.print(p.x);
-				Serial.print(", y = ");
-				Serial.print(p.y);
-				delay(100);
-				Serial.println();
-			}
-		}
+	for (uint32_t i = 0; i < (uint32_t)display->getWidth() * (uint32_t)display->getHeight() / BUFFER_SIZE; i++) {
+		storage->readImagePortion(buffer, BUFFER_SIZE);
+		display->writeBuffer(buffer, BUFFER_SIZE);
 	}
-}
 
-void clear() {
-	display->clear();
-	display->drawHLine(0, 400, display->getWidth(), ILI9486_WHITE);
-	display->drawString(10, 440, "Clear", ILI9486::L, ILI9486_WHITE);
+	delay(1000);
 }
