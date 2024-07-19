@@ -31,6 +31,8 @@ public:
 
     void readImagePortion(uint16_t *buffer, uint16_t size); // Load portion of image into buffer
 
+    File getCurrentImage(); // Get current image object 
+
 private:
     File imageDir; // Directory with images
     File currentImage;

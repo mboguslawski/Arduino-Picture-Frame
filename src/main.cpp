@@ -50,12 +50,13 @@ void loop() {
 	uint16_t buffer[BUFFER_SIZE];
 	storage->nextImage();
 
-	uint32_t time = millis();
-
+	display->openWindow(0, 0, display->getWidth(), display->getHeight());
 	for (uint32_t i = 0; i < (uint32_t)display->getWidth() * (uint32_t)display->getHeight() / BUFFER_SIZE; i++) {
 		storage->readImagePortion(buffer, BUFFER_SIZE);
 		display->writeBuffer(buffer, BUFFER_SIZE);
 	}
+
+	display->drawString(10, 460, (uint8_t*)storage->getCurrentImage().name(), ILI9486::L, ILI9486_BLACK);
 
 	delay(1000);
 }

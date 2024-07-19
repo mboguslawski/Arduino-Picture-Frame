@@ -36,6 +36,10 @@ SDStorage::SDStorage(uint8_t SD_CS_PIN, uint16_t disWidth, uint16_t disHeight, S
     this->nextImage();
 }
 
+File SDStorage::getCurrentImage() {
+    return this->currentImage;
+}
+
 void SDStorage::nextImage() {
     while (true) {
         this->currentImage.close();
