@@ -27,21 +27,38 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #include "../Calibration/Calibration.h"
 #include "../SDStorage/SDStorage.h"
 
+#define IMG_BUFFER 20 // Loading image buffer size in pixels
+#define DISPLAY_TIME 5000 // Time of photo display in miliseconds
+#define INTRO_DISPLAY_TIME 5000 // Time of intro display in miliseconds
+#define TOUCH_DELAY 500
+
 class DigitalFrame {
 public:
+    enum State {
+        IMAGE_DISPLAY,
+        STATS_TO_DISPLAY,
+        STATS_DISPLAYED
+    };
+    
     DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibration *calibration, SDStorage *storage, String introFile);
 
     void loop(); // This method must be called in arduino loop function
 
 private:
+    State currentState; // Program state
     ILI9486 *display;
     XPT2046_Touchscreen *touch;
     Calibration *calibration;
     SDStorage *storage;
-
     String introFile; // Path to file with intro
     uint32_t imageNumber; // Number of images
+    uint32_t lastImageDisTime; // Time of last image display
+    uint32_t lastTouchTime; // Time of last touch
 
     uint32_t loadImage();
+    uint32_t loadImagePortion();
     void countImages();
+
+    bool checkTouch();
+    void getTouch(uint16_t &x, uint16_t &y);
 };
