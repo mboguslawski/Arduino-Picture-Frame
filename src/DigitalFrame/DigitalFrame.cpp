@@ -30,9 +30,11 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
     storage(storage),
     introFile(introFile)
 {
+    this->countImages();
+    
     // Display intro image
     storage->toImage("intro.bmp");
-	loadImage();
+	this->loadImage();
 	display->changeDefaultBacklight(UINT8_MAX);
 	display->setDefaultBacklight();
 	delay(INTRO_DISPLAY_TIME);
@@ -55,4 +57,15 @@ uint32_t DigitalFrame::loadImage() {
 	}
 
 	return millis() - time;
+}
+
+void DigitalFrame::countImages() {
+    this->imageNumber = 0;
+
+    String name = storage->getCurrentImage().name();
+
+    do {
+        imageNumber++;
+        storage->nextImage();
+    } while (name != storage->getCurrentImage().name());
 }

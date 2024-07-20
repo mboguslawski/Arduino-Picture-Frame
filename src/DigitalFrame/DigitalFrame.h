@@ -39,7 +39,9 @@ private:
     Calibration *calibration;
     SDStorage *storage;
 
-    String introFile;
+    String introFile; // Path to file with intro
+    uint32_t imageNumber; // Number of images
 
     uint32_t loadImage();
+    void countImages();
 };
