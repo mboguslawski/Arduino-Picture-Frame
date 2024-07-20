@@ -20,18 +20,24 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #include "SDStorage.h"
 #include "Calibration.h"
 
+#define DISPLAY_TIME 5000 // 5 seconds
+#define INTRO_TIME 5000 // Two seconds
+
+// Pin configuration
+#define ILI9486_CS 10
+#define ILI9486_BL 9
+#define ILI9486_RST 8
+#define ILI9486_DC 7
+#define XPT2046_CS 4
+#define XPT2046_IRQ 3
+
+// XPT2046 touch coordinates calibration 
 #define X_BEGIN 555
 #define X_END 3551
 #define Y_BEGIN 3783
 #define Y_END 392
 
-#define BUFFER_SIZE 100
-
-#define DISPLAY_TIME 5000 // 5 seconds
-#define INTRO_TIME 5000 // Two seconds
-
-#define TP_CS 4
-#define TP_IRQ 3
+#define BUFFER_SIZE 40
 
 ILI9486 *display;
 XPT2046_Touchscreen *touch;
@@ -43,13 +49,13 @@ SDStorage *storage;
 uint32_t loadImage();
 
 void setup() {
-	display = new ILI9486(ILI9486::R2L_U2D, 0, ILI9486_BLACK);
+	display = new ILI9486(ILI9486_CS, ILI9486_BL, ILI9486_RST, ILI9486_DC, ILI9486::R2L_U2D, 0, ILI9486_BLACK);
 	
 	digitalWrite(ILI9486_CS, 1);
 	digitalWrite(4, 1);
 	storage = new SDStorage(5, display->getWidth(), display->getHeight(), "/images");
 	
-	touch = new XPT2046_Touchscreen(TP_CS, TP_IRQ);
+	touch = new XPT2046_Touchscreen(XPT2046_CS, XPT2046_IRQ);
 	touch->begin();
 	
 	calibration = new Calibration(true, display, touch);
