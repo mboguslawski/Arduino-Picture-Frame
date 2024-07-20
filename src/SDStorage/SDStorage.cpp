@@ -40,7 +40,9 @@ File SDStorage::getCurrentImage() {
     return this->currentImage;
 }
 
-void SDStorage::nextImage() {
+uint16_t SDStorage::nextImage() {
+    uint16_t skipped = 0;
+    
     while (true) {
         this->currentImage.close();
         this->currentImage = this->imageDir.openNextFile();
@@ -53,7 +55,10 @@ void SDStorage::nextImage() {
         }
 
         if (this->validateImage(this->currentImage)) { break; }
+        skipped++;
     }
+
+    return skipped;
 }
 
 bool SDStorage::toImage(String image) {

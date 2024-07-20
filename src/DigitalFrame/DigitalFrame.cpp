@@ -25,8 +25,8 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
     touch(touch),
     calibration(calibration),
     storage(storage),
-    introFile(introFile),
     imagesDisplayed(0),
+    invalidImages(0),
     lastImageDisTime(0),
     lastTouchTime(0),
     loadIndex(0)
@@ -37,10 +37,11 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
     this->countImages();
     
     // Display intro image
-    storage->toImage("intro.bmp");
+    storage->toImage(introFile);
 	this->loadImage();
 	display->changeDefaultBacklight(UINT8_MAX);
 	display->setDefaultBacklight();
+
 	delay(INTRO_DISPLAY_TIME);
 }
 
@@ -49,7 +50,7 @@ void DigitalFrame::loop() {
     case IMAGE_DISPLAY:
         // Display new image if display time for old image passed
         if (millis() - this->lastImageDisTime > DISPLAY_TIME) {
-            storage->nextImage();
+            this->invalidImages += storage->nextImage();
             display->openWindow(0, 0, display->getWidth(), display->getHeight());
 
             uint32_t startTime = millis();
@@ -75,21 +76,24 @@ void DigitalFrame::loop() {
     case STATS_TO_DISPLAY:
         // Display statistics panel
         display->clear();
-        display->drawString(10, 440, "Statistics", ILI9486::XL, ILI9486_WHITE);
         display->drawHLine(0, 415, display->getWidth(), ILI9486_WHITE);
         
-        String s = "Image number: ";
-        s += this->imageNumberInDir;
-        display->drawString(10, 395, (uint8_t*)s.c_str(), ILI9486::L, ILI9486_WHITE);
+        String s1 = "Image number: ";
+        s1 += this->imageNumberInDir;
+        display->drawString(10, 395, (uint8_t*)s1.c_str(), ILI9486::L, ILI9486_WHITE);
 
-        s = "Load time: ";
-        s += this->getLoadTime();
-        s += " ms";
-        display->drawString(10, 375, (uint8_t*)s.c_str(), ILI9486::L, ILI9486_WHITE);
+        String s2 = "Load time: ";
+        s2 += this->getLoadTime();
+        s2 += " ms";
+        display->drawString(10, 375, (uint8_t*)s2.c_str(), ILI9486::L, ILI9486_WHITE);
 
-        s = "Images displayed: ";
-        s += this->imagesDisplayed;
-        display->drawString(10, 355, (uint8_t*)s.c_str(), ILI9486::L, ILI9486_WHITE);
+        String s3 = "Images displayed: ";
+        s3 += this->imagesDisplayed;
+        display->drawString(10, 355, (uint8_t*)s3.c_str(), ILI9486::L, ILI9486_WHITE);
+
+        String s4 = "Invalid images: ";
+        s4 += this->invalidImages;
+        display->drawString(10, 335, (uint8_t*)s4.c_str(), ILI9486::L, ILI9486_WHITE);
 
         this->currentState = STATS_DISPLAYED;
         break;

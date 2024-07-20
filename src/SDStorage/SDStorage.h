@@ -28,7 +28,7 @@ public:
 
     SDStorage(uint8_t SD_CS_PIN, uint16_t disWidth, uint16_t disHeight, String imageDir);
 
-    void nextImage(); // Switch to next image available in imageDir
+    uint16_t nextImage(); // Switch to next image available in imageDir, return number of invalid images
     bool toImage(String imageFile); // Go to specific image
 
     void readImagePortion(uint16_t *buffer, uint16_t size); // Load portion of image into buffer

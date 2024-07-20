@@ -45,14 +45,14 @@ DigitalFrame *frame;
 
 void setup() {
 	display = new ILI9486(ILI9486_CS, ILI9486_BL, ILI9486_RST, ILI9486_DC, ILI9486::R2L_U2D, 0, ILI9486_BLACK);
-	
+
 	digitalWrite(ILI9486_CS, 1);
 	digitalWrite(4, 1);
 	storage = new SDStorage(5, display->getWidth(), display->getHeight(), "/images");
 	
 	touch = new XPT2046_Touchscreen(XPT2046_CS, XPT2046_IRQ);
 	touch->begin();
-	
+
 	calibration = new Calibration(true, display, touch);
 	calibration->calibrate(X_BEGIN, X_END, Y_BEGIN, Y_END);
 

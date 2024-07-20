@@ -51,9 +51,9 @@ private:
     XPT2046_Touchscreen *touch;
     Calibration *calibration;
     SDStorage *storage;
-    String introFile; // Path to file with intro
     uint32_t imagesDisplayed; // Number of images displayed so far 
     uint32_t imageNumberInDir; // Number of images in directory
+    uint32_t invalidImages; // Number of skipped images (invalid)
     uint32_t lastImageDisTime; // Time of last image display
     uint32_t lastTouchTime; // Time of last touch
     uint32_t loadTimes[BUFFER_LOAD_TIMES]; // Last images load time
