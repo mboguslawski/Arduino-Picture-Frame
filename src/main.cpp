@@ -19,9 +19,9 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 #include "SDStorage/SDStorage.h"
 #include "Calibration/Calibration.h"
+#include "DigitalFrame/DigitalFrame.h"
 
-#define DISPLAY_TIME 5000 // 5 seconds
-#define INTRO_TIME 5000 // Two seconds
+#define INTRO_IMAGE_PATH "intro.bmp"
 
 // Pin configuration
 #define ILI9486_CS 10
@@ -37,16 +37,11 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #define Y_BEGIN 3783
 #define Y_END 392
 
-#define BUFFER_SIZE 40
-
 ILI9486 *display;
 XPT2046_Touchscreen *touch;
 Calibration *calibration;
 SDStorage *storage;
-
-// Load image marked as current in SDStorage object
-// Return time needed for display (ms)
-uint32_t loadImage();
+DigitalFrame *frame;
 
 void setup() {
 	display = new ILI9486(ILI9486_CS, ILI9486_BL, ILI9486_RST, ILI9486_DC, ILI9486::R2L_U2D, 0, ILI9486_BLACK);
@@ -61,29 +56,9 @@ void setup() {
 	calibration = new Calibration(true, display, touch);
 	calibration->calibrate(X_BEGIN, X_END, Y_BEGIN, Y_END);
 
-	storage->toImage("intro.bmp");
-	loadImage();
-	display->changeDefaultBacklight(UINT8_MAX);
-	display->setDefaultBacklight();
-	delay(INTRO_TIME);
-
+	frame = new DigitalFrame(display, touch, calibration, storage, INTRO_IMAGE_PATH);
 }
 
 void loop() {
-	storage->nextImage();
-	loadImage();
-	delay(DISPLAY_TIME);
-}
-
-uint32_t loadImage() {
-	uint32_t time = millis();
-	uint16_t buffer[BUFFER_SIZE];
-
-	display->openWindow(0, 0, display->getWidth(), display->getHeight());
-	for (uint32_t i = 0; i < display->getSize() / BUFFER_SIZE; i++) {
-		storage->readImagePortion(buffer, BUFFER_SIZE);
-		display->writeBuffer(buffer, BUFFER_SIZE);
-	}
-
-	return millis() - time;
+	frame->loop();
 }
