@@ -26,9 +26,14 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
     calibration(calibration),
     storage(storage),
     introFile(introFile),
+    imagesDisplayed(0),
     lastImageDisTime(0),
-    lastTouchTime(0)
+    lastTouchTime(0),
+    loadIndex(0)
 {
+    // Initialize image load times
+    for (uint8_t i = 0; i < BUFFER_LOAD_TIMES; i++) { this->loadTimes[i] = 0; }
+
     this->countImages();
     
     // Display intro image
@@ -47,13 +52,23 @@ void DigitalFrame::loop() {
             storage->nextImage();
             display->openWindow(0, 0, display->getWidth(), display->getHeight());
 
+            uint32_t startTime = millis();
             // Load image by portions and check for touch
             for (uint32_t i = 0; i < display->getSize() / IMG_BUFFER; i++) {
                 this->loadImagePortion();
                 if (checkTouch()) { break; }
             }
 
-            this->lastImageDisTime = millis();
+            // Full image loaded
+            if (this->currentState == IMAGE_DISPLAY) {
+                this->imagesDisplayed++;
+
+                // Calculate place for time placement
+                this->loadIndex = (this->loadIndex + 1) % BUFFER_LOAD_TIMES;
+                
+                this->loadTimes[loadIndex] = millis() - startTime;
+                this->lastImageDisTime = millis();
+            }
         }
         break;
 
@@ -64,9 +79,17 @@ void DigitalFrame::loop() {
         display->drawHLine(0, 415, display->getWidth(), ILI9486_WHITE);
         
         String s = "Image number: ";
-        s += this->imageNumber;
+        s += this->imageNumberInDir;
+        display->drawString(10, 395, (uint8_t*)s.c_str(), ILI9486::L, ILI9486_WHITE);
 
-        display->drawString(10, 400, (uint8_t*)s.c_str(), ILI9486::L, ILI9486_WHITE);
+        s = "Load time: ";
+        s += this->getLoadTime();
+        s += " ms";
+        display->drawString(10, 375, (uint8_t*)s.c_str(), ILI9486::L, ILI9486_WHITE);
+
+        s = "Images displayed: ";
+        s += this->imagesDisplayed;
+        display->drawString(10, 355, (uint8_t*)s.c_str(), ILI9486::L, ILI9486_WHITE);
 
         this->currentState = STATS_DISPLAYED;
         break;
@@ -102,12 +125,12 @@ uint32_t DigitalFrame::loadImagePortion() {
 }
 
 void DigitalFrame::countImages() {
-    this->imageNumber = 0;
+    this->imageNumberInDir = 0;
 
     // Count images until same image occurred after directory rewind
     String name = storage->getCurrentImage().name();
     do {
-        imageNumber++;
+        imageNumberInDir++;
         storage->nextImage();
     } while (name != storage->getCurrentImage().name());
 }
@@ -145,4 +168,19 @@ void DigitalFrame::getTouch(uint16_t &x, uint16_t &y) {
 
     x = p.x;
     y = p.y;
+}
+
+uint32_t DigitalFrame::getLoadTime() {
+    uint32_t sum = 0;
+    for (uint8_t i = 0; i < BUFFER_LOAD_TIMES; i++) {
+        sum += this->loadTimes[i];
+    }
+
+    // If full buffer not loaded yet
+    uint32_t dived = min(BUFFER_LOAD_TIMES, this->imagesDisplayed);
+    if (dived == 0) {
+        return 0;
+    }
+
+    return sum / min(BUFFER_LOAD_TIMES, this->imagesDisplayed);    
 }

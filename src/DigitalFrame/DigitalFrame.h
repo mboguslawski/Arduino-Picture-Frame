@@ -27,10 +27,11 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #include "../Calibration/Calibration.h"
 #include "../SDStorage/SDStorage.h"
 
-#define IMG_BUFFER 20 // Loading image buffer size in pixels
+#define IMG_BUFFER 40 // Loading image buffer size in pixels
 #define DISPLAY_TIME 5000 // Time of photo display in miliseconds
 #define INTRO_DISPLAY_TIME 5000 // Time of intro display in miliseconds
 #define TOUCH_DELAY 500
+#define BUFFER_LOAD_TIMES 5 // How many last load times to store
 
 class DigitalFrame {
 public:
@@ -51,12 +52,16 @@ private:
     Calibration *calibration;
     SDStorage *storage;
     String introFile; // Path to file with intro
-    uint32_t imageNumber; // Number of images
+    uint32_t imagesDisplayed; // Number of images displayed so far 
+    uint32_t imageNumberInDir; // Number of images in directory
     uint32_t lastImageDisTime; // Time of last image display
     uint32_t lastTouchTime; // Time of last touch
+    uint32_t loadTimes[BUFFER_LOAD_TIMES]; // Last images load time
+    uint8_t loadIndex; // Index into which last image load time was saved (always 0 <= loadIndex < BUFFER_LOAD_TIMES)
 
     uint32_t loadImage();
     uint32_t loadImagePortion();
+    uint32_t getLoadTime(); // Get average load time of last few images
     void countImages();
 
     bool checkTouch();
