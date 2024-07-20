@@ -17,8 +17,8 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #include <ILI9486.h>
 #include <XPT2046_Touchscreen.h>
 
-#include "SDStorage.h"
-#include "Calibration.h"
+#include "SDStorage/SDStorage.h"
+#include "Calibration/Calibration.h"
 
 #define DISPLAY_TIME 5000 // 5 seconds
 #define INTRO_TIME 5000 // Two seconds
