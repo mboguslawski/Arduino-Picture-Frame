@@ -27,7 +27,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #include "../Calibration/Calibration.h"
 #include "../SDStorage/SDStorage.h"
 
-#define IMG_BUFFER 40 // Loading image buffer size in pixels
+#define IMG_BUFFER 60 // Loading image buffer size in pixels
 #define INTRO_DISPLAY_TIME 5000 // Time of intro display in miliseconds
 #define TOUCH_DELAY 500
 #define BUFFER_LOAD_TIMES 5 // How many last load times to store
