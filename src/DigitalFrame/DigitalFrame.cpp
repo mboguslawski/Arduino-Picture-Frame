@@ -29,7 +29,8 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
     invalidImages(0),
     lastImageDisTime(0),
     lastTouchTime(0),
-    loadIndex(0)
+    loadIndex(0),
+    brightnessLevel(BRIGHTNESS_LEVELS - 1)
 {
     // Initialize image load times
     for (uint8_t i = 0; i < BUFFER_LOAD_TIMES; i++) { this->loadTimes[i] = 0; }
@@ -39,7 +40,7 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
     // Display intro image
     storage->toImage(introFile);
 	this->loadImage();
-	display->changeDefaultBacklight(UINT8_MAX);
+	display->changeDefaultBacklight(brightnessLevels[brightnessLevel]);
 	display->setDefaultBacklight();
 
 	delay(INTRO_DISPLAY_TIME);
@@ -139,6 +140,8 @@ bool DigitalFrame::checkTouch() {
         case MENU_DISPLAY:
             this->handleMenuTouch(x, y);
             break;
+        case SET_BRIGHTNESS:
+            this->handleSetBrightnessTouch(x, y);
     }
 
     return true;
@@ -205,6 +208,7 @@ void DigitalFrame::displayMenu() {
 void DigitalFrame::handleMenuTouch(uint16_t x, uint16_t y) {
     // Touch on set brightness option
     if (y > 360) {
+        this->displaySetBrightness();
         this->currentState = SET_BRIGHTNESS;
     }
     // Touch on set display time option
@@ -219,5 +223,53 @@ void DigitalFrame::handleMenuTouch(uint16_t x, uint16_t y) {
     // Touch on go back option
     else {
         this->currentState = IMAGE_DISPLAY;
+    }
+}
+
+void DigitalFrame::displaySetBrightness() {
+    display->clear();
+    
+    display->drawString(10, 420, "Brightness up", ILI9486::L, ILI9486_WHITE);
+    display->drawHLine(0, 360, display->getWidth(), ILI9486_WHITE);
+    
+    String current = "";
+    current += this->brightnessLevel + 1;
+    display->drawString(10, 300, (uint8_t*)current.c_str(), ILI9486::L, ILI9486_WHITE);
+
+    display->drawHLine(0, 240, display->getWidth(), ILI9486_WHITE);
+    display->drawString(10, 180, "Brightness down", ILI9486::L, ILI9486_WHITE);
+    display->drawHLine(0, 120, display->getWidth(), ILI9486_WHITE);
+    display->drawString(10, 60, "Go back", ILI9486::L, ILI9486_WHITE);
+}
+
+void DigitalFrame::handleSetBrightnessTouch(uint16_t x, uint16_t y) {
+    // Touch on brightness up
+    if (y > 360) {
+        if (this->brightnessLevel == BRIGHTNESS_LEVELS - 1) { return; }
+        this->brightnessLevel++;
+        display->changeDefaultBacklight(brightnessLevels[this->brightnessLevel]);
+        display->setDefaultBacklight();
+    }
+    // Touch on current brightness level
+    else if (y > 240) {
+    }
+    // Touch on brightness down
+    else if (y > 120) {
+        if (this->brightnessLevel == 0) { return; }
+        this->brightnessLevel--;
+        display->changeDefaultBacklight(brightnessLevels[this->brightnessLevel]);
+        display->setDefaultBacklight();
+    }
+    // Touch on go back option
+    else {
+        this->currentState = IMAGE_DISPLAY;
+    }
+
+    // Update brightness level
+    if ( (y > 360) || ( (y < 240) && (y > 120) ) ) {
+        display->fill(0, 241, display->getWidth(), 360, ILI9486_BLACK);
+        String current = "";
+        current += this->brightnessLevel + 1;
+        display->drawString(10, 300, (uint8_t*)current.c_str(), ILI9486::L, ILI9486_WHITE);
     }
 }
