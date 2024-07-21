@@ -64,6 +64,8 @@ private:
     uint32_t getLoadTime(); // Get average load time of last few images
     void countImages();
 
+    void displayStats(); // Display statistic on the screen
+
     bool checkTouch();
     void getTouch(uint16_t &x, uint16_t &y);
 };

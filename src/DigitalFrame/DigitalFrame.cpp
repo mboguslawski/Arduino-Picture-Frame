@@ -74,28 +74,7 @@ void DigitalFrame::loop() {
         break;
 
     case STATS_TO_DISPLAY:
-        // Display statistics panel
-        display->clear();
-        display->drawHLine(0, 415, display->getWidth(), ILI9486_WHITE);
-        
-        String s1 = "Image number: ";
-        s1 += this->imageNumberInDir;
-        display->drawString(10, 395, (uint8_t*)s1.c_str(), ILI9486::L, ILI9486_WHITE);
-
-        String s2 = "Load time: ";
-        s2 += this->getLoadTime();
-        s2 += " ms";
-        display->drawString(10, 375, (uint8_t*)s2.c_str(), ILI9486::L, ILI9486_WHITE);
-
-        String s3 = "Images displayed: ";
-        s3 += this->imagesDisplayed;
-        display->drawString(10, 355, (uint8_t*)s3.c_str(), ILI9486::L, ILI9486_WHITE);
-
-        String s4 = "Invalid images: ";
-        s4 += this->invalidImages;
-        display->drawString(10, 335, (uint8_t*)s4.c_str(), ILI9486::L, ILI9486_WHITE);
-
-        this->currentState = STATS_DISPLAYED;
+        this->displayStats();
         break;
     }
 
@@ -187,4 +166,29 @@ uint32_t DigitalFrame::getLoadTime() {
     }
 
     return sum / min(BUFFER_LOAD_TIMES, this->imagesDisplayed);    
+}
+
+void DigitalFrame::displayStats() {
+    // Display statistics panel
+    display->clear();
+    display->drawHLine(0, 415, display->getWidth(), ILI9486_WHITE);
+        
+    String s1 = "Image number: ";
+    s1 += this->imageNumberInDir;
+    display->drawString(10, 395, (uint8_t*)s1.c_str(), ILI9486::L, ILI9486_WHITE);
+
+    String s2 = "Load time: ";
+    s2 += this->getLoadTime();
+    s2 += " ms";
+    display->drawString(10, 375, (uint8_t*)s2.c_str(), ILI9486::L, ILI9486_WHITE);
+
+    String s3 = "Images displayed: ";
+    s3 += this->imagesDisplayed;
+    display->drawString(10, 355, (uint8_t*)s3.c_str(), ILI9486::L, ILI9486_WHITE);
+
+    String s4 = "Invalid images: ";
+    s4 += this->invalidImages;
+    display->drawString(10, 335, (uint8_t*)s4.c_str(), ILI9486::L, ILI9486_WHITE);
+
+    this->currentState = STATS_DISPLAYED;
 }
