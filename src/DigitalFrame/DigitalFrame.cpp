@@ -141,6 +141,7 @@ bool DigitalFrame::checkTouch() {
             break;
         case STATS_DISPLAY:
             this->changeState(IMAGE_DISPLAY);
+            break;
         case MENU_DISPLAY:
             this->handleMenuTouch(x, y);
             break;
