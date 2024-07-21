@@ -72,6 +72,9 @@ private:
     uint32_t loadImagePortion();
     uint32_t getLoadTime(); // Get average load time of last few images
     void countImages();
+    bool checkTouch();
+    void getTouch(uint16_t &x, uint16_t &y);
+    void changeState(State newState);
 
     void displayStats(); // Display statistic on the screen
     void displayMenu(); // Display menu with options on the screen
@@ -81,7 +84,4 @@ private:
     void handleMenuTouch(uint16_t x, uint16_t y); // Handle screen touch while menu display
     void handleSetBrightnessTouch(uint16_t x, uint16_t y); // Handle screen touch while setting brightness
     void handleSetDispTimeTouch(uint16_t x, uint16_t y); // Handle screen touch while setting display time
-
-    bool checkTouch();
-    void getTouch(uint16_t &x, uint16_t &y);
 };

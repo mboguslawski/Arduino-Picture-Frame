@@ -135,12 +135,10 @@ bool DigitalFrame::checkTouch() {
     // Switch state depending on current state
     switch(this->currentState) {
         case IMAGE_DISPLAY:
-            this->displayMenu();
-            this->currentState = MENU_DISPLAY;
+            this->changeState(MENU_DISPLAY);
             break;
         case STATS_DISPLAY:
-            this->currentState = IMAGE_DISPLAY;
-            break;
+            this->changeState(IMAGE_DISPLAY);
         case MENU_DISPLAY:
             this->handleMenuTouch(x, y);
             break;
@@ -176,6 +174,28 @@ uint32_t DigitalFrame::getLoadTime() {
     }
 
     return sum / min(BUFFER_LOAD_TIMES, this->imagesDisplayed);    
+}
+
+void DigitalFrame::changeState(State newState) {
+    this->currentState = newState;
+
+    switch(newState) {
+        case IMAGE_DISPLAY:
+            this->forceImageDisplay = true;
+            break;
+        case MENU_DISPLAY:
+            this->displayMenu();
+            break;
+        case SET_BRIGHTNESS:
+            this->displaySetBrightness();
+            break;
+        case SET_DISP_TIME:
+            this->displaySetDispTime();
+            break;
+        case STATS_DISPLAY:
+            this->displayStats();
+            break; 
+    }
 }
 
 void DigitalFrame::displayStats() {
@@ -216,22 +236,19 @@ void DigitalFrame::displayMenu() {
 void DigitalFrame::handleMenuTouch(uint16_t x, uint16_t y) {
     // Touch on set brightness option
     if (y > 360) {
-        this->displaySetBrightness();
-        this->currentState = SET_BRIGHTNESS;
+        this->changeState(SET_BRIGHTNESS);
     }
     // Touch on set display time option
     else if (y > 240) {
-        this->displaySetDispTime();
-        this->currentState = SET_DISP_TIME;
+        this->changeState(SET_DISP_TIME);
     }
     // Touch on show statistics option
     else if (y > 120) {
-        this->displayStats();
-        this->currentState = STATS_DISPLAY;
+        this->changeState(STATS_DISPLAY);
     }
     // Touch on go back option
     else {
-        this->currentState = IMAGE_DISPLAY;
+        this->changeState(IMAGE_DISPLAY);
     }
 }
 
@@ -271,7 +288,7 @@ void DigitalFrame::handleSetBrightnessTouch(uint16_t x, uint16_t y) {
     }
     // Touch on go back option
     else {
-        this->currentState = IMAGE_DISPLAY;
+        this->changeState(IMAGE_DISPLAY);
     }
 
     // Update brightness level
@@ -322,7 +339,7 @@ void DigitalFrame::handleSetDispTimeTouch(uint16_t x, uint16_t y) {
     }
     // Touch on go back option
     else {
-        this->currentState = IMAGE_DISPLAY;
+        this->changeState(IMAGE_DISPLAY);
     }
 
     // Update brightness level
