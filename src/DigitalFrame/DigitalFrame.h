@@ -28,10 +28,12 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #include "../SDStorage/SDStorage.h"
 
 #define IMG_BUFFER 40 // Loading image buffer size in pixels
-#define DISPLAY_TIME 5000 // Time of photo display in miliseconds
 #define INTRO_DISPLAY_TIME 5000 // Time of intro display in miliseconds
 #define TOUCH_DELAY 500
 #define BUFFER_LOAD_TIMES 5 // How many last load times to store
+#define DISP_TIME_LEVELS 5
+#define DEFAULT_DISP_TIME_LEVEL 2
+constexpr uint32_t dispTimeLevels[DISP_TIME_LEVELS] = {5000, 30000, 60000, 300000, 600000};
 #define BRIGHTNESS_LEVELS 5
 constexpr uint8_t brightnessLevels[BRIGHTNESS_LEVELS] = {10, 60, 90, 160, 255};
 
@@ -63,6 +65,8 @@ private:
     uint32_t loadTimes[BUFFER_LOAD_TIMES]; // Last images load time
     uint8_t loadIndex; // Index into which last image load time was saved (always 0 <= loadIndex < BUFFER_LOAD_TIMES)
     uint8_t brightnessLevel; // Current brightness level
+    uint32_t dispTimeLevel; // Single image display time
+    bool forceImageDisplay; // Force image display, do not look on display time
 
     uint32_t loadImage();
     uint32_t loadImagePortion();
@@ -72,9 +76,11 @@ private:
     void displayStats(); // Display statistic on the screen
     void displayMenu(); // Display menu with options on the screen
     void displaySetBrightness(); // Display menu to set brightness
+    void displaySetDispTime(); // Display menu to set brightness
     
     void handleMenuTouch(uint16_t x, uint16_t y); // Handle screen touch while menu display
     void handleSetBrightnessTouch(uint16_t x, uint16_t y); // Handle screen touch while setting brightness
+    void handleSetDispTimeTouch(uint16_t x, uint16_t y); // Handle screen touch while setting display time
 
     bool checkTouch();
     void getTouch(uint16_t &x, uint16_t &y);

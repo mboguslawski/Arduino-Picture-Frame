@@ -30,7 +30,9 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
     lastImageDisTime(0),
     lastTouchTime(0),
     loadIndex(0),
-    brightnessLevel(BRIGHTNESS_LEVELS - 1)
+    brightnessLevel(BRIGHTNESS_LEVELS - 1),
+    dispTimeLevel(DEFAULT_DISP_TIME_LEVEL),
+    forceImageDisplay(true)
 {
     // Initialize image load times
     for (uint8_t i = 0; i < BUFFER_LOAD_TIMES; i++) { this->loadTimes[i] = 0; }
@@ -50,7 +52,9 @@ void DigitalFrame::loop() {
     switch(this->currentState) {
     case IMAGE_DISPLAY:
         // Display new image if display time for old image passed
-        if (millis() - this->lastImageDisTime > DISPLAY_TIME) {
+        if ( (this->forceImageDisplay) || (millis() - this->lastImageDisTime > dispTimeLevels[this->dispTimeLevel]) ) {
+            this->forceImageDisplay = false;
+
             this->invalidImages += storage->nextImage();
             display->openWindow(0, 0, display->getWidth(), display->getHeight());
 
@@ -142,6 +146,10 @@ bool DigitalFrame::checkTouch() {
             break;
         case SET_BRIGHTNESS:
             this->handleSetBrightnessTouch(x, y);
+            break;
+        case SET_DISP_TIME:
+            this->handleSetDispTimeTouch(x, y);
+            break;
     }
 
     return true;
@@ -213,6 +221,7 @@ void DigitalFrame::handleMenuTouch(uint16_t x, uint16_t y) {
     }
     // Touch on set display time option
     else if (y > 240) {
+        this->displaySetDispTime();
         this->currentState = SET_DISP_TIME;
     }
     // Touch on show statistics option
@@ -270,6 +279,64 @@ void DigitalFrame::handleSetBrightnessTouch(uint16_t x, uint16_t y) {
         display->fill(0, 241, display->getWidth(), 360, ILI9486_BLACK);
         String current = "";
         current += this->brightnessLevel + 1;
+        display->drawString(10, 300, (uint8_t*)current.c_str(), ILI9486::L, ILI9486_WHITE);
+    }
+}
+
+void DigitalFrame::displaySetDispTime() {
+    display->clear();
+    
+    display->drawString(10, 420, "Longer", ILI9486::L, ILI9486_WHITE);
+    display->drawHLine(0, 360, display->getWidth(), ILI9486_WHITE);
+    
+    String current = "";
+    uint32_t time = dispTimeLevels[this->dispTimeLevel];
+    if (time >= 60000) {
+        current += (time / 60000);
+        current += " minutes";
+    } else {
+        current += (time / 1000);
+        current += "seconds";
+    }
+    display->drawString(10, 300, (uint8_t*)current.c_str(), ILI9486::L, ILI9486_WHITE);
+
+    display->drawHLine(0, 240, display->getWidth(), ILI9486_WHITE);
+    display->drawString(10, 180, "Shorter", ILI9486::L, ILI9486_WHITE);
+    display->drawHLine(0, 120, display->getWidth(), ILI9486_WHITE);
+    display->drawString(10, 60, "Go back", ILI9486::L, ILI9486_WHITE);
+}
+
+void DigitalFrame::handleSetDispTimeTouch(uint16_t x, uint16_t y) {
+    // Touch on longer
+    if (y > 360) {
+        if (this->dispTimeLevel >= DISP_TIME_LEVELS - 1) { return; }
+        this->dispTimeLevel++;
+    }
+    // Touch on current display time
+    else if (y > 240) {
+    }
+    // Touch on shorter
+    else if (y > 120) {
+        if (this->dispTimeLevel <= 0) { return; }
+        this->dispTimeLevel--;
+    }
+    // Touch on go back option
+    else {
+        this->currentState = IMAGE_DISPLAY;
+    }
+
+    // Update brightness level
+    if ( (y > 360) || ( (y < 240) && (y > 120) ) ) {
+        display->fill(0, 241, display->getWidth(), 360, ILI9486_BLACK);
+        String current = "";
+        uint32_t time = dispTimeLevels[this->dispTimeLevel];
+        if (time >= 60000) {
+            current += (time / 60000);
+            current += " minutes";
+        } else {
+            current += (time / 1000);
+            current += "seconds";
+        }
         display->drawString(10, 300, (uint8_t*)current.c_str(), ILI9486::L, ILI9486_WHITE);
     }
 }
