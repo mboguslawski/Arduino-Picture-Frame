@@ -146,3 +146,22 @@ uint32_t SDStorage::readLittleIndian32(File f) {
     d |= b;
     return d;
 }
+
+void SDStorage::saveSettings(uint8_t *settings, uint16_t nBytes) {
+    File file = SD.open(SETTINGS_FILE, O_READ | O_WRITE | O_CREAT);
+    file.seek(0);
+
+    for (uint16_t i = 0; i < nBytes; i++) {
+        file.write(settings[i]);
+    }
+
+    file.close();
+}
+
+void SDStorage::loadSettings(uint8_t *settings, uint16_t nBytes) {
+    File file = SD.open(SETTINGS_FILE);
+
+    file.read(settings, nBytes);
+
+    file.close();
+}

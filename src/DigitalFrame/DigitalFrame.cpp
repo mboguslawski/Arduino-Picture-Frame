@@ -34,6 +34,8 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
     dispTimeLevel(DEFAULT_DISP_TIME_LEVEL),
     forceImageDisplay(true)
 {
+    this->loadSettings();
+    
     // Initialize image load times
     for (uint8_t i = 0; i < BUFFER_LOAD_TIMES; i++) { this->loadTimes[i] = 0; }
 
@@ -177,6 +179,10 @@ uint32_t DigitalFrame::getLoadTime() {
 }
 
 void DigitalFrame::changeState(State newState) {
+    if (this->currentState == SET_BRIGHTNESS || this->currentState == SET_DISP_TIME) {
+        this->saveSettings();
+    }
+    
     this->currentState = newState;
 
     switch(newState) {
@@ -356,4 +362,17 @@ void DigitalFrame::handleSetDispTimeTouch(uint16_t x, uint16_t y) {
         }
         display->drawString(10, 300, (uint8_t*)current.c_str(), ILI9486::L, ILI9486_WHITE);
     }
+}
+
+void DigitalFrame::saveSettings() {
+    uint8_t s[2] = {this->brightnessLevel, this->dispTimeLevel};
+    storage->saveSettings(s, 2);
+}
+
+void DigitalFrame::loadSettings() {
+    uint8_t s[2];
+    storage->loadSettings(s, 2);
+
+    this->brightnessLevel = s[0];
+    this->dispTimeLevel = s[1];
 }

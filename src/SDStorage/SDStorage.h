@@ -23,6 +23,8 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 #include <SD.h>
 
+#define SETTINGS_FILE "settings.txt"
+
 class SDStorage {
 public:
 
@@ -33,7 +35,10 @@ public:
 
     void readImagePortion(uint16_t *buffer, uint16_t size); // Load portion of image into buffer
 
-    File getCurrentImage(); // Get current image object 
+    File getCurrentImage(); // Get current image object
+
+    void saveSettings(uint8_t *settings, uint16_t nBytes);
+    void loadSettings(uint8_t *settings, uint16_t nBytes); 
 
 private:
     File imageDir; // Directory with images
