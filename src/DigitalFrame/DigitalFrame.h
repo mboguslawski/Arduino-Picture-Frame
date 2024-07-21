@@ -31,11 +31,13 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #define INTRO_DISPLAY_TIME 5000 // Time of intro display in miliseconds
 #define TOUCH_DELAY 500
 #define BUFFER_LOAD_TIMES 5 // How many last load times to store
+
 #define DISP_TIME_LEVELS 5
 #define DEFAULT_DISP_TIME_LEVEL 2
 constexpr uint32_t dispTimeLevels[DISP_TIME_LEVELS] = {5000, 30000, 60000, 300000, 600000};
-#define BRIGHTNESS_LEVELS 5
-constexpr uint8_t brightnessLevels[BRIGHTNESS_LEVELS] = {10, 60, 90, 160, 255};
+
+#define BRIGHTNESS_LEVELS 4
+constexpr uint8_t brightnessLevels[BRIGHTNESS_LEVELS] = {10, 40, 90, 255};
 
 class DigitalFrame {
 public:
