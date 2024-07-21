@@ -72,10 +72,6 @@ void DigitalFrame::loop() {
             }
         }
         break;
-
-    case STATS_TO_DISPLAY:
-        this->displayStats();
-        break;
     }
 
     // Check if touch occurred
@@ -127,18 +123,21 @@ bool DigitalFrame::checkTouch() {
     if (!touched) { return false; }
 
     // If touch occurred
+    uint16_t x, y;
+    this->getTouch(x, y);
     lastTouchTime = millis();
 
     // Switch state depending on current state
     switch(this->currentState) {
         case IMAGE_DISPLAY:
-            this->currentState = STATS_TO_DISPLAY;
+            this->displayMenu();
+            this->currentState = MENU_DISPLAY;
             break;
-        case STATS_DISPLAYED:
+        case STATS_DISPLAY:
             this->currentState = IMAGE_DISPLAY;
             break;
-        case STATS_TO_DISPLAY:
-            this->currentState = IMAGE_DISPLAY;
+        case MENU_DISPLAY:
+            this->handleMenuTouch(x, y);
             break;
     }
 
@@ -189,6 +188,36 @@ void DigitalFrame::displayStats() {
     String s4 = "Invalid images: ";
     s4 += this->invalidImages;
     display->drawString(10, 335, (uint8_t*)s4.c_str(), ILI9486::L, ILI9486_WHITE);
+}
 
-    this->currentState = STATS_DISPLAYED;
+void DigitalFrame::displayMenu() {
+    display->clear();
+    
+    display->drawString(10, 420, "Set brightness", ILI9486::L, ILI9486_WHITE);
+    display->drawHLine(0, 360, display->getWidth(), ILI9486_WHITE);
+    display->drawString(10, 300, "Set display time", ILI9486::L, ILI9486_WHITE);
+    display->drawHLine(0, 240, display->getWidth(), ILI9486_WHITE);
+    display->drawString(10, 180, "Show statistics", ILI9486::L, ILI9486_WHITE);
+    display->drawHLine(0, 120, display->getWidth(), ILI9486_WHITE);
+    display->drawString(10, 60, "Go back", ILI9486::L, ILI9486_WHITE);
+}
+
+void DigitalFrame::handleMenuTouch(uint16_t x, uint16_t y) {
+    // Touch on set brightness option
+    if (y > 360) {
+        this->currentState = SET_BRIGHTNESS;
+    }
+    // Touch on set display time option
+    else if (y > 240) {
+        this->currentState = SET_DISP_TIME;
+    }
+    // Touch on show statistics option
+    else if (y > 120) {
+        this->displayStats();
+        this->currentState = STATS_DISPLAY;
+    }
+    // Touch on go back option
+    else {
+        this->currentState = IMAGE_DISPLAY;
+    }
 }

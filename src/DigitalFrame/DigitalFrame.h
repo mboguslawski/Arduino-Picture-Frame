@@ -37,8 +37,10 @@ class DigitalFrame {
 public:
     enum State {
         IMAGE_DISPLAY,
-        STATS_TO_DISPLAY,
-        STATS_DISPLAYED
+        STATS_DISPLAY,
+        MENU_DISPLAY,
+        SET_BRIGHTNESS,
+        SET_DISP_TIME
     };
     
     DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibration *calibration, SDStorage *storage, String introFile);
@@ -65,6 +67,8 @@ private:
     void countImages();
 
     void displayStats(); // Display statistic on the screen
+    void displayMenu(); // Display menu with options on the screen
+    void handleMenuTouch(uint16_t x, uint16_t y); // Handle screen touch while menu display
 
     bool checkTouch();
     void getTouch(uint16_t &x, uint16_t &y);
