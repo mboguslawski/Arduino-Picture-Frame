@@ -208,8 +208,8 @@ void DigitalFrame::displayStats() {
     // Display statistics panel
     display->clear();
     display->drawHLine(0, 415, display->getWidth(), ILI9486_WHITE);
-        
-    String s1 = "Image number: ";
+
+    String s1 = "Images on SD: ";
     s1 += this->imageNumberInDir;
     display->drawString(10, 395, (uint8_t*)s1.c_str(), ILI9486::L, ILI9486_WHITE);
 
@@ -319,7 +319,7 @@ void DigitalFrame::displaySetDispTime() {
         current += " minutes";
     } else {
         current += (time / 1000);
-        current += "seconds";
+        current += " seconds";
     }
     display->drawString(10, 300, (uint8_t*)current.c_str(), ILI9486::L, ILI9486_WHITE);
 
@@ -358,7 +358,7 @@ void DigitalFrame::handleSetDispTimeTouch(uint16_t x, uint16_t y) {
             current += " minutes";
         } else {
             current += (time / 1000);
-            current += "seconds";
+            current += " seconds";
         }
         display->drawString(10, 300, (uint8_t*)current.c_str(), ILI9486::L, ILI9486_WHITE);
     }
