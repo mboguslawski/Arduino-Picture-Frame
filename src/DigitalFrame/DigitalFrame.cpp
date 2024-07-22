@@ -30,7 +30,9 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
     lastTouchTime(0),
     brightnessLevel(BRIGHTNESS_LEVELS - 1),
     dispTimeLevel(DEFAULT_DISP_TIME_LEVEL),
-    forceImageDisplay(true)
+    forceImageDisplay(true),
+    imageRandDisplayed({}),
+    randDisplayedN(0)
 {
     this->loadSettings();
     this->countImages();
@@ -59,9 +61,33 @@ void DigitalFrame::loop() {
             case IN_ORDER:
                 storage->nextImage();
                 break;
+
             case RANDOM:
-                storage->toImage( random(this->imageNumberInDir + 1) );
+                // Pick random image from those not displayed recently
+                uint16_t imageN = random(this->imageNumberInDir + 1 - this->randDisplayedN);
+                // Find image not displayed recently
+                uint16_t notDisp = imageN;
+                uint16_t index = 0;
+                for (uint16_t i = 0; i < imageN + 1; i++) {
+                    if (this->imageRandDisplayed[index++]) { 
+                        notDisp++;
+                        i--;
+                    }
+                }
+
+                // Mark image as recently displayed
+                this->imageRandDisplayed[notDisp] = true;
+                this->randDisplayedN++;
+
+                // If all recently displayed, reset 
+                if (this->randDisplayedN == this->imageNumberInDir) {
+                    this->randDisplayedN = 0;
+                    for (uint32_t i = 0; i < MAX_IMG_N; i++) { this->imageRandDisplayed[i] = false; }
+                }
+
+                storage->toImage(notDisp);
                 break;
+
             case ONLY_CURRENT:
                 storage->toImage( storage->getImageNumber() );
                 break;
@@ -171,6 +197,7 @@ void DigitalFrame::changeState(State newState) {
         this->saveSettings();
     }
     
+    display->clear();
     this->currentState = newState;
 
     switch(newState) {
