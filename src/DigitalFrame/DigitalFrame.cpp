@@ -33,7 +33,7 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
 {
     this->loadSettings();
     this->countImages();
-    
+
     // Display intro image
     storage->toImage(introFile);
 	this->loadImage();
@@ -162,20 +162,21 @@ void DigitalFrame::changeState(State newState) {
             this->forceImageDisplay = true;
             break;
         case MENU_DISPLAY:
-            this->displayMenu();
+            storage->toImage("m.bmp");
+            this->loadImage();
             break;
         case SET_BRIGHTNESS:
-            this->displaySetBrightness();
+            storage->toImage("b.bmp");
+            this->loadImage();
+            this->displayLevel(this->brightnessLevel, BRIGHTNESS_LEVELS);
             break;
         case SET_DISP_TIME:
-            this->displaySetDispTime();
+            storage->toImage("t.bmp");
+            this->loadImage();
+            this->displayLevel(this->dispTimeLevel, DISP_TIME_LEVELS);
             break;
        
     }
-}
-
-void DigitalFrame::displayMenu() {
-    display->clear();
 }
 
 void DigitalFrame::handleMenuTouch(uint16_t x, uint16_t y) {
@@ -197,8 +198,13 @@ void DigitalFrame::handleMenuTouch(uint16_t x, uint16_t y) {
     }
 }
 
-void DigitalFrame::displaySetBrightness() {
-    display->clear();
+void DigitalFrame::displayLevel(uint8_t level, uint8_t max) {
+    uint16_t x = 50;
+    for (uint8_t i = 0; i < max - 1; i++) {
+        ILI9486_COLOR c = (i < level) ? ILI9486_WHITE : ILI9486_BLACK;
+        display->fill(x, 270, x + 15, 330, c);
+        x += 20;
+    }
 }
 
 void DigitalFrame::handleSetBrightnessTouch(uint16_t x, uint16_t y) {
@@ -226,11 +232,8 @@ void DigitalFrame::handleSetBrightnessTouch(uint16_t x, uint16_t y) {
 
     // Update brightness level
     if ( (y > 360) || ( (y < 240) && (y > 120) ) ) {
+        this->displayLevel(this->brightnessLevel, BRIGHTNESS_LEVELS);
     }
-}
-
-void DigitalFrame::displaySetDispTime() {
-    display->clear();
 }
 
 void DigitalFrame::handleSetDispTimeTouch(uint16_t x, uint16_t y) {
@@ -254,6 +257,7 @@ void DigitalFrame::handleSetDispTimeTouch(uint16_t x, uint16_t y) {
 
     // Update brightness level
     if ( (y > 360) || ( (y < 240) && (y > 120) ) ) {
+        this->displayLevel(this->dispTimeLevel, DISP_TIME_LEVELS);
     }
 }
 

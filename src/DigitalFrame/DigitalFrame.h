@@ -72,10 +72,8 @@ private:
     void getTouch(uint16_t &x, uint16_t &y);
     void changeState(State newState);
 
-    void displayMenu(); // Display menu with options on the screen
-    void displaySetBrightness(); // Display menu to set brightness
-    void displaySetDispTime(); // Display menu to set brightness
-    
+    void displayLevel(uint8_t level, uint8_t max); // Display menu to set brightness
+
     void handleMenuTouch(uint16_t x, uint16_t y); // Handle screen touch while menu display
     void handleSetBrightnessTouch(uint16_t x, uint16_t y); // Handle screen touch while setting brightness
     void handleSetDispTimeTouch(uint16_t x, uint16_t y); // Handle screen touch while setting display time
