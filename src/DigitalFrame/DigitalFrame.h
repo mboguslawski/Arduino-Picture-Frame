@@ -43,7 +43,6 @@ class DigitalFrame {
 public:
     enum State {
         IMAGE_DISPLAY,
-        STATS_DISPLAY,
         MENU_DISPLAY,
         SET_BRIGHTNESS,
         SET_DISP_TIME
@@ -59,26 +58,20 @@ private:
     XPT2046_Touchscreen *touch;
     Calibration *calibration;
     SDStorage *storage;
-    uint32_t imagesDisplayed; // Number of images displayed so far 
     uint32_t imageNumberInDir; // Number of images in directory
-    uint32_t invalidImages; // Number of skipped images (invalid)
     uint32_t lastImageDisTime; // Time of last image display
     uint32_t lastTouchTime; // Time of last touch
-    uint32_t loadTimes[BUFFER_LOAD_TIMES]; // Last images load time
-    uint8_t loadIndex; // Index into which last image load time was saved (always 0 <= loadIndex < BUFFER_LOAD_TIMES)
     uint8_t brightnessLevel; // Current brightness level
     uint32_t dispTimeLevel; // Single image display time
     bool forceImageDisplay; // Force image display, do not look on display time
 
     uint32_t loadImage();
     uint32_t loadImagePortion();
-    uint32_t getLoadTime(); // Get average load time of last few images
     void countImages();
     bool checkTouch();
     void getTouch(uint16_t &x, uint16_t &y);
     void changeState(State newState);
 
-    void displayStats(); // Display statistic on the screen
     void displayMenu(); // Display menu with options on the screen
     void displaySetBrightness(); // Display menu to set brightness
     void displaySetDispTime(); // Display menu to set brightness
