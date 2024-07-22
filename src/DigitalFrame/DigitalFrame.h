@@ -45,15 +45,23 @@ public:
         IMAGE_DISPLAY,
         MENU_DISPLAY,
         SET_BRIGHTNESS,
-        SET_DISP_TIME
+        SET_DISP_TIME,
+        SET_DISP_MODE
     };
     
+    enum DispMode {
+        RANDOM = 0,
+        IN_ORDER = 1,
+        ONLY_CURRENT = 2
+    };
+
     DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibration *calibration, SDStorage *storage, String introFile);
 
     void loop(); // This method must be called in arduino loop function
 
 private:
     State currentState; // Program state
+    DispMode currentDispMode;
     ILI9486 *display;
     XPT2046_Touchscreen *touch;
     Calibration *calibration;
@@ -73,10 +81,12 @@ private:
     void changeState(State newState);
 
     void displayLevel(uint8_t level, uint8_t max); // Display menu to set brightness
+    void displaySelected(uint8_t selected);
 
     void handleMenuTouch(uint16_t x, uint16_t y); // Handle screen touch while menu display
     void handleSetBrightnessTouch(uint16_t x, uint16_t y); // Handle screen touch while setting brightness
     void handleSetDispTimeTouch(uint16_t x, uint16_t y); // Handle screen touch while setting display time
+    void handleSetDispModeTouch(uint16_t x, uint16_t y); // // Handle screen touch while setting display mode
 
     void saveSettings();
     void loadSettings();

@@ -21,6 +21,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 SDStorage::SDStorage(uint8_t SD_CS_PIN, uint16_t disWidth, uint16_t disHeight, String imageDir):
     initialized(false),
+    imageNumber(UINT16_MAX),
     disWidth(disWidth),
     disHeight(disHeight)
 {
@@ -40,9 +41,13 @@ File SDStorage::getCurrentImage() {
     return this->currentImage;
 }
 
+uint16_t SDStorage::getImageNumber() {
+    return this->imageNumber;
+}
+
 uint16_t SDStorage::nextImage() {
     uint16_t skipped = 0;
-    
+
     while (true) {
         this->currentImage.close();
         this->currentImage = this->imageDir.openNextFile();
@@ -52,12 +57,14 @@ uint16_t SDStorage::nextImage() {
             this->imageDir.rewindDirectory();
             this->currentImage.close();
             this->currentImage = this->imageDir.openNextFile();
+            this->imageNumber = 0;
         }
 
         if (this->validateImage(this->currentImage)) { break; }
         skipped++;
     }
 
+    this->imageNumber++;
     return skipped;
 }
 
@@ -65,6 +72,18 @@ bool SDStorage::toImage(String image) {
     this->currentImage.close();
     this->currentImage = SD.open(image);
     return this->validateImage(this->currentImage);
+}
+
+bool SDStorage::toImage(uint16_t imagePos) {
+    this->currentImage.close();
+    this->imageDir.rewindDirectory();
+
+    for (uint16_t i = 0; i < imagePos - 1; i++) {
+        this->imageDir.openNextFile().close();
+    }
+
+    this->nextImage();
+    this->imageNumber = imagePos;
 }
 
 uint16_t SDStorage::RGB24ToRGB16(uint8_t r, uint8_t g, uint8_t b) {
@@ -106,7 +125,6 @@ bool SDStorage::validateImage(File &image) {
     if ( max(imageWidth, imageWidth) != max(disWidth, disHeight)
         && min(imageWidth, imageHeight) != min(disHeight, disWidth) )
     {
-        Serial.println(1);
         return false;
     }
 

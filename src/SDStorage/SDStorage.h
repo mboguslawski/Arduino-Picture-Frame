@@ -32,10 +32,12 @@ public:
 
     uint16_t nextImage(); // Switch to next image available in imageDir, return number of invalid images
     bool toImage(String imageFile); // Go to specific image
+    bool toImage(uint16_t imagePos);
 
     void readImagePortion(uint16_t *buffer, uint16_t size); // Load portion of image into buffer
 
     File getCurrentImage(); // Get current image object
+    uint16_t getImageNumber();
 
     void saveSettings(uint8_t *settings, uint16_t nBytes);
     void loadSettings(uint8_t *settings, uint16_t nBytes); 
@@ -44,6 +46,7 @@ private:
     File imageDir; // Directory with images
     File currentImage;
     bool initialized; // True if SD card was initialized without errors
+    uint16_t imageNumber;
     uint16_t disWidth; // Display width [px]
     uint16_t disHeight; // Display height [px]
 

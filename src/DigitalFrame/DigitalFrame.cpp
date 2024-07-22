@@ -21,6 +21,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibration *calibration, SDStorage *storage, String introFile):
     currentState(IMAGE_DISPLAY),
+    currentDispMode(RANDOM),
     display(display),
     touch(touch),
     calibration(calibration),
@@ -33,6 +34,10 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
 {
     this->loadSettings();
     this->countImages();
+
+    // Pin A0 is unconnected
+    // Electric noise will cause to generate different seed values
+    randomSeed(analogRead(A0));
 
     // Display intro image
     storage->toImage(introFile);
@@ -50,10 +55,20 @@ void DigitalFrame::loop() {
         if ( (this->forceImageDisplay) || (millis() - this->lastImageDisTime > dispTimeLevels[this->dispTimeLevel]) ) {
             this->forceImageDisplay = false;
 
-            storage->nextImage();
+            switch(this->currentDispMode) {
+            case IN_ORDER:
+                storage->nextImage();
+                break;
+            case RANDOM:
+                storage->toImage( random(this->imageNumberInDir + 1) );
+                break;
+            case ONLY_CURRENT:
+                storage->toImage( storage->getImageNumber() );
+                break;
+            }
+            
             display->openWindow(0, 0, display->getWidth(), display->getHeight());
 
-            uint32_t startTime = millis();
             // Load image by portions and check for touch
             for (uint32_t i = 0; i < display->getSize() / IMG_BUFFER; i++) {
                 this->loadImagePortion();
@@ -126,8 +141,6 @@ bool DigitalFrame::checkTouch() {
         case IMAGE_DISPLAY:
             this->changeState(MENU_DISPLAY);
             break;
-        
-            break;
         case MENU_DISPLAY:
             this->handleMenuTouch(x, y);
             break;
@@ -136,6 +149,9 @@ bool DigitalFrame::checkTouch() {
             break;
         case SET_DISP_TIME:
             this->handleSetDispTimeTouch(x, y);
+            break;
+        case SET_DISP_MODE:
+            this->handleSetDispModeTouch(x, y);
             break;
     }
 
@@ -151,7 +167,7 @@ void DigitalFrame::getTouch(uint16_t &x, uint16_t &y) {
 }
 
 void DigitalFrame::changeState(State newState) {
-    if (this->currentState == SET_BRIGHTNESS || this->currentState == SET_DISP_TIME) {
+    if ( (this->currentState == SET_BRIGHTNESS) || (this->currentState == SET_DISP_TIME) || (this->currentState == SET_DISP_MODE) ) {
         this->saveSettings();
     }
     
@@ -175,7 +191,11 @@ void DigitalFrame::changeState(State newState) {
             this->loadImage();
             this->displayLevel(this->dispTimeLevel, DISP_TIME_LEVELS);
             break;
-       
+        case SET_DISP_MODE:
+            storage->toImage("o.bmp");
+            this->loadImage();
+            this->displaySelected((uint8_t)this->currentDispMode);
+            break;
     }
 }
 
@@ -188,9 +208,9 @@ void DigitalFrame::handleMenuTouch(uint16_t x, uint16_t y) {
     else if (y > 240) {
         this->changeState(SET_DISP_TIME);
     }
-    // Touch on show statistics option
+    // Touch on set display mode option
     else if (y > 120) {
-      
+        this->changeState(SET_DISP_MODE);
     }
     // Touch on go back option
     else {
@@ -204,6 +224,15 @@ void DigitalFrame::displayLevel(uint8_t level, uint8_t max) {
         ILI9486_COLOR c = (i < level) ? ILI9486_WHITE : ILI9486_BLACK;
         display->fill(x, 270, x + 15, 330, c);
         x += 20;
+    }
+}
+
+void DigitalFrame::displaySelected(uint8_t selected) {
+    uint16_t y = 420;
+    for (uint8_t i = 0; i < 3; i++) {
+        ILI9486_COLOR c = (i == selected) ? ILI9486_WHITE : ILI9486_BLACK;
+        display->drawCircle(305, y, 10, c, true);
+        y -= 120;
     }
 }
 
@@ -261,15 +290,52 @@ void DigitalFrame::handleSetDispTimeTouch(uint16_t x, uint16_t y) {
     }
 }
 
+void DigitalFrame::handleSetDispModeTouch(uint16_t x, uint16_t y) {
+    // Touch on random
+    if (y > 360) {
+        this->currentDispMode = RANDOM;
+    }
+    // Touch on in order 
+    else if (y > 240) {
+        this->currentDispMode = IN_ORDER;
+    }
+    // Touch on only current image
+    else if (y > 120) {
+        this->currentDispMode = ONLY_CURRENT;
+    }
+    // Touch on go back option
+    else {
+        this->changeState(IMAGE_DISPLAY);
+    }
+
+    // Update mode
+    if (y > 120) {
+        this->displaySelected((uint8_t)this->currentDispMode);
+    }
+}
+
 void DigitalFrame::saveSettings() {
-    uint8_t s[2] = {this->brightnessLevel, this->dispTimeLevel};
-    storage->saveSettings(s, 2);
+    uint8_t s[5] = {
+        this->brightnessLevel,
+        this->dispTimeLevel,
+        (uint8_t)this->currentDispMode,
+        storage->getImageNumber() >> 8,
+        storage->getImageNumber() & 0xFF
+    };
+
+    storage->saveSettings(s, 5);
 }
 
 void DigitalFrame::loadSettings() {
-    uint8_t s[2];
-    storage->loadSettings(s, 2);
+    uint8_t s[5];
+    storage->loadSettings(s, 5);
 
     this->brightnessLevel = s[0];
     this->dispTimeLevel = s[1];
+    this->currentDispMode = (DispMode)s[2];
+
+    if (currentDispMode == ONLY_CURRENT) {
+        uint16_t imageN = ((uint16_t)s[3] << 8) | (uint16_t)s[4];
+        storage->toImage(imageN);
+    }
 }
