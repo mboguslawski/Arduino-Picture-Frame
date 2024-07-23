@@ -58,41 +58,41 @@ void DigitalFrame::loop() {
             this->forceImageDisplay = false;
 
             switch(this->currentDispMode) {
-            case IN_ORDER:
-                storage->nextImage();
-                break;
+                case IN_ORDER:
+                    storage->nextImage();
+                    break;
 
-            case RANDOM:
-                // Pick random image from those not displayed recently
-                uint16_t imageN = random(this->imageNumberInDir + 1 - this->randDisplayedN);
-                // Find image not displayed recently
-                uint16_t notDisp = imageN;
-                uint16_t index = 0;
-                for (uint16_t i = 0; i < imageN + 1; i++) {
-                    if (this->imageRandDisplayed[index++]) { 
-                        notDisp++;
-                        i--;
+                case RANDOM: {
+                    // Pick random image from those not displayed recently
+                    uint16_t imageN = random(this->imageNumberInDir - this->randDisplayedN);
+                    // Find image not displayed recently
+                    uint16_t notDisp = imageN;
+                    uint16_t index = 0;
+                    for (uint16_t i = 0; i < imageN + 1; i++) {
+                        if (this->imageRandDisplayed[index++]) { 
+                            notDisp++;
+                            i--;
+                        }
                     }
+
+                    // Mark image as recently displayed
+                    this->imageRandDisplayed[notDisp] = true;
+                    this->randDisplayedN++;
+
+                    // If all recently displayed, reset 
+                    if (this->randDisplayedN >= this->imageNumberInDir) {
+                        this->randDisplayedN = 0;
+                        for (uint32_t i = 0; i < MAX_IMG_N; i++) { this->imageRandDisplayed[i] = false; }
+                    }
+
+                    storage->toImage(notDisp);
+                    break;
                 }
-
-                // Mark image as recently displayed
-                this->imageRandDisplayed[notDisp] = true;
-                this->randDisplayedN++;
-
-                // If all recently displayed, reset 
-                if (this->randDisplayedN == this->imageNumberInDir) {
-                    this->randDisplayedN = 0;
-                    for (uint32_t i = 0; i < MAX_IMG_N; i++) { this->imageRandDisplayed[i] = false; }
-                }
-
-                storage->toImage(notDisp);
-                break;
-
-            case ONLY_CURRENT:
-                storage->toImage( storage->getImageNumber() );
-                break;
+                case ONLY_CURRENT:
+                    storage->toImage( storage->getImageNumber() );
+                    break;
             }
-            
+
             display->openWindow(0, 0, display->getWidth(), display->getHeight());
 
             // Load image by portions and check for touch

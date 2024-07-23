@@ -29,7 +29,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 #define MAX_IMG_N 256 // Maximum number of images in directory (used for mageRandDisplayed array)
 
-#define IMG_BUFFER 60 // Loading image buffer size in pixels
+#define IMG_BUFFER 40 // Loading image buffer size in pixels
 #define INTRO_DISPLAY_TIME 5000 // Time of intro display in miliseconds
 #define TOUCH_DELAY 500
 #define BUFFER_LOAD_TIMES 5 // How many last load times to store
@@ -75,7 +75,7 @@ private:
     uint32_t dispTimeLevel; // Single image display time
     bool forceImageDisplay; // Force image display, do not look on display time
     bool imageRandDisplayed[MAX_IMG_N]; // Store information if image was displayed in random mode
-    uint16_t randDisplayedN; // Store number of images displayed in random mode
+    uint32_t randDisplayedN; // Store number of images displayed in random mode
 
     uint32_t loadImage();
     uint32_t loadImagePortion();
