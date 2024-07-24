@@ -48,7 +48,8 @@ public:
         MENU_DISPLAY,
         SET_BRIGHTNESS,
         SET_DISP_TIME,
-        SET_DISP_MODE
+        SET_DISP_MODE,
+        SD_ERROR
     };
     
     enum DispMode {
@@ -86,6 +87,7 @@ private:
 
     void displayLevel(uint8_t level, uint8_t max); // Display menu to set brightness
     void displaySelected(uint8_t selected);
+    void displayStorageError();
 
     void handleMenuTouch(uint16_t x, uint16_t y); // Handle screen touch while menu display
     void handleSetBrightnessTouch(uint16_t x, uint16_t y); // Handle screen touch while setting brightness

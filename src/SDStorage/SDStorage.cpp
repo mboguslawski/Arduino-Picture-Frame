@@ -45,6 +45,10 @@ uint16_t SDStorage::getImageNumber() {
     return this->imageNumber;
 }
 
+bool SDStorage::isOk() {
+    return this->initialized;
+}
+
 uint16_t SDStorage::nextImage() {
     uint16_t skipped = 0;
 
@@ -90,13 +94,19 @@ uint16_t SDStorage::RGB24ToRGB16(uint8_t r, uint8_t g, uint8_t b) {
     return (( (r) >> 3 ) << 11 ) | (( (g) >> 2 ) << 5) | ( (b) >> 3);
 }
 
-void SDStorage::readImagePortion(uint16_t *buffer, uint16_t size) {
+bool SDStorage::readImagePortion(uint16_t *buffer, uint16_t size) {
     uint8_t pixels[size*3];
-    this->currentImage.read(pixels, size*3);
+    int err = this->currentImage.read(pixels, size*3);
 
+    if (err == -1) {
+        return false;
+    }
+    
     for (uint16_t i  = 0; i < size; i++) {
         buffer[i] = this->RGB24ToRGB16(pixels[i*3 + 2], pixels[i*3 + 1], pixels[i*3 + 0]);
     }
+
+    return true;
 }
 
 

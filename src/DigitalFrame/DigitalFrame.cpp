@@ -34,6 +34,10 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
     imageRandDisplayed({}),
     randDisplayedN(0)
 {
+    if (!storage->isOk()) { 
+        this->changeState(SD_ERROR);
+    }
+    
     this->loadSettings();
     this->countImages();
 
@@ -120,8 +124,14 @@ uint32_t DigitalFrame::loadImage() {
 	// Load image into display
     display->openWindow(0, 0, display->getWidth(), display->getHeight());
 	for (uint32_t i = 0; i < display->getSize() / IMG_BUFFER; i++) {
-		storage->readImagePortion(buffer, IMG_BUFFER);
-		display->writeBuffer(buffer, IMG_BUFFER);
+		bool ok = storage->readImagePortion(buffer, IMG_BUFFER);
+		
+         // If error while reading from sd
+        if (!ok) {
+            this->changeState(SD_ERROR);
+        }
+        
+        display->writeBuffer(buffer, IMG_BUFFER);
 	}
 
 	return millis() - time;
@@ -132,7 +142,13 @@ uint32_t DigitalFrame::loadImagePortion() {
 	uint16_t buffer[IMG_BUFFER];
 
     // Load only one portion
-	storage->readImagePortion(buffer, IMG_BUFFER);
+	bool ok = storage->readImagePortion(buffer, IMG_BUFFER);
+
+    // If error while reading from sd
+    if (!ok) {
+        this->changeState(SD_ERROR);
+    }
+
 	display->writeBuffer(buffer, IMG_BUFFER);
 
 	return millis() - time;
@@ -223,6 +239,11 @@ void DigitalFrame::changeState(State newState) {
             this->loadImage();
             this->displaySelected((uint8_t)this->currentDispMode);
             break;
+        case SD_ERROR:
+            display->setBacklight(255);
+            this->displayStorageError();
+            while(1){}
+            break;
     }
 }
 
@@ -261,6 +282,13 @@ void DigitalFrame::displaySelected(uint8_t selected) {
         display->drawCircle(305, y, 10, c, true);
         y -= 120;
     }
+}
+
+void DigitalFrame::displayStorageError() {
+    display->clear();
+    display->drawLine(80, 120, display->getWidth()-80, display->getHeight()-120, ILI9486_RED);
+    display->drawLine(80, display->getHeight()-120, display->getWidth()-80, 120, ILI9486_RED);
+    display->drawString(70, 400, "SD card error", ILI9486::L, ILI9486_RED);
 }
 
 void DigitalFrame::handleSetBrightnessTouch(uint16_t x, uint16_t y) {
