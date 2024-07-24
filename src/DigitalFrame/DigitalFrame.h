@@ -87,6 +87,7 @@ private:
 
     void displayLevel(uint8_t level, uint8_t max); // Display menu to set brightness
     void displaySelected(uint8_t selected);
+    void displayTime(uint32_t time);
     void displayStorageError();
 
     void handleMenuTouch(uint16_t x, uint16_t y); // Handle screen touch while menu display

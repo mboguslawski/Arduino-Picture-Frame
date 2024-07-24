@@ -232,7 +232,7 @@ void DigitalFrame::changeState(State newState) {
         case SET_DISP_TIME:
             storage->toImage("t.bmp");
             this->loadImage();
-            this->displayLevel(this->dispTimeLevel, DISP_TIME_LEVELS);
+            this->displayTime(dispTimeLevels[this->dispTimeLevel]);
             break;
         case SET_DISP_MODE:
             storage->toImage("o.bmp");
@@ -282,6 +282,60 @@ void DigitalFrame::displaySelected(uint8_t selected) {
         display->drawCircle(305, y, 10, c, true);
         y -= 120;
     }
+}
+
+void DigitalFrame::displayTime(uint32_t time) {
+    display->fill(0, 270, display->getWidth(), 330, ILI9486_BLACK);
+    
+    char text[128];
+    bool seconds = true;
+
+    if (time >= 60000) {
+        time /= 60000;
+        seconds = false;
+    } else {
+        time /= 1000;
+    }
+    
+    uint16_t digitCount = 0;
+
+    uint32_t tmp = time;
+    while (tmp) {
+        digitCount++;
+        tmp /= 10;
+    }
+
+    Serial.println(digitCount);
+
+    uint16_t i = digitCount;
+    while(time) {
+        text[i-1] = (time % 10) + '0';
+        time /= 10;
+        i--;
+    }
+
+    text[digitCount] = ' ';
+
+    if (seconds) {
+        text[digitCount+1] = 's';
+        text[digitCount+2] = 'e';
+        text[digitCount+3] = 'c';
+        text[digitCount+4] = 'o';
+        text[digitCount+5] = 'n';
+        text[digitCount+6] = 'd';
+    } else {
+        text[digitCount+1] = 'm';
+        text[digitCount+2] = 'i';
+        text[digitCount+3] = 'n';
+        text[digitCount+4] = 'u';
+        text[digitCount+5] = 't';
+        text[digitCount+6] = 'e';
+    }
+
+    text[digitCount+7] = (text[0] != '1' || digitCount != 1) ? 's' : ' ';
+    text[digitCount+8] = '\0';
+
+    display->drawString(30, 300, (uint8_t*)text,ILI9486::L, ILI9486_WHITE );
 }
 
 void DigitalFrame::displayStorageError() {
@@ -341,7 +395,7 @@ void DigitalFrame::handleSetDispTimeTouch(uint16_t x, uint16_t y) {
 
     // Update brightness level
     if ( (y > 360) || ( (y < 240) && (y > 120) ) ) {
-        this->displayLevel(this->dispTimeLevel, DISP_TIME_LEVELS);
+        this->displayTime(dispTimeLevels[this->dispTimeLevel]);
     }
 }
 
