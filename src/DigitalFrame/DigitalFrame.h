@@ -75,14 +75,15 @@ private:
     XPT2046_Touchscreen *touch;
     Calibration *calibration;
     SDStorage *storage;
+
     uint32_t imageNumberInDir; // Number of images in directory
     uint32_t lastImageDisTime; // Time of last image display
     uint32_t lastTouchTime; // Time of last touch
+    uint32_t randDisplayedN; // Store number of images displayed in random mode
     uint8_t brightnessLevel; // Current brightness level
-    uint32_t dispTimeLevel; // Single image display time
+    uint8_t dispTimeLevel; // Single image display time
     bool forceImageDisplay; // Force image display, do not look on display time
     bool imageRandDisplayed[MAX_IMG_N]; // Store information if image was displayed in random mode
-    uint32_t randDisplayedN; // Store number of images displayed in random mode
 
     void loadImage();
     void loadImagePortion();

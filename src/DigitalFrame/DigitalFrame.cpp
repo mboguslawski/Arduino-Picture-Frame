@@ -448,8 +448,8 @@ void DigitalFrame::saveSettings() {
 		this->brightnessLevel,
 		this->dispTimeLevel,
 		(uint8_t)this->currentDispMode,
-		storage->getImageNumber() >> 8, // Image number is stored in 16 bit variable 
-		storage->getImageNumber() & 0xFF
+		(uint8_t)(storage->getImageNumber() >> 8), // Image number is stored in 16 bit variable 
+		(uint8_t)(storage->getImageNumber() & 0xFF)
 	};
 
 	storage->saveSettings(s, 5);
