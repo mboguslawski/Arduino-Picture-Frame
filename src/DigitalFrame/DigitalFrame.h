@@ -27,6 +27,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #include "../Calibration/Calibration.h"
 #include "../SDStorage/SDStorage.h"
 
+#define INTRO_BMP "intro.bmp"
 #define MENU_BMP "m.bmp"
 #define BRIGHTNESS_BMP "b.bmp"
 #define DISP_TIME_BMP "t.bmp"
@@ -63,7 +64,7 @@ public:
         ONLY_CURRENT = 2
     };
 
-    DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibration *calibration, SDStorage *storage, String introFile);
+    DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibration *calibration, SDStorage *storage);
 
     void loop(); // This method must be called in arduino loop function
 

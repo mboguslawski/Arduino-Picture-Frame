@@ -19,7 +19,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 #include "DigitalFrame.h"
 
-DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibration *calibration, SDStorage *storage, String introFile):
+DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibration *calibration, SDStorage *storage):
 	currentState(IMAGE_DISPLAY),
 	currentDispMode(RANDOM),
 	display(display),
@@ -39,6 +39,13 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
 		this->changeState(SD_ERROR);
 	}
 	
+	// Display intro image
+	storage->toImage(INTRO_BMP);
+	this->loadImage();
+	display->setBacklight(255);
+	uint32_t introDispStart = millis();
+
+	// Load settings while displaying image
 	this->loadSettings();
 	this->countImages();
 
@@ -46,13 +53,13 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
 	// Electric noise will cause to generate different seed values
 	randomSeed(analogRead(A0));
 
-	// Display intro image
-	storage->toImage(introFile);
-	this->loadImage();
 	display->changeDefaultBacklight(brightnessLevels[brightnessLevel]);
 	display->setDefaultBacklight();
 
-	delay(INTRO_DISPLAY_TIME);
+	// Wait for rest of intro display
+	while(INTRO_DISPLAY_TIME >= (millis() - introDispStart) ) {
+		delay(100);
+	}
 
 	// Loop() will not load image in ONLY_CURRENT mode
 	if (this->currentDispMode == ONLY_CURRENT) {

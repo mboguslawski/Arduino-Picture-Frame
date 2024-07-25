@@ -21,8 +21,6 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #include "Calibration/Calibration.h"
 #include "DigitalFrame/DigitalFrame.h"
 
-#define INTRO_IMAGE_PATH "intro.bmp"
-
 // Pin configuration
 #define ILI9486_CS 10
 #define ILI9486_BL 9
@@ -57,7 +55,7 @@ void setup() {
 	calibration = new Calibration(true, display, touch);
 	calibration->calibrate(X_BEGIN, X_END, Y_BEGIN, Y_END);
 
-	frame = new DigitalFrame(display, touch, calibration, storage, INTRO_IMAGE_PATH);
+	frame = new DigitalFrame(display, touch, calibration, storage);
 }
 
 void loop() {
