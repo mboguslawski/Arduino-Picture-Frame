@@ -27,6 +27,11 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #include "../Calibration/Calibration.h"
 #include "../SDStorage/SDStorage.h"
 
+#define MENU_BMP "m.bmp"
+#define BRIGHTNESS_BMP "b.bmp"
+#define DISP_TIME_BMP "t.bmp"
+#define DISP_MODE_BMP "o.bmp"
+
 #define MAX_IMG_N 256 // Maximum number of images in directory (used for mageRandDisplayed array)
 
 #define IMG_BUFFER 40 // Loading image buffer size in pixels
@@ -78,8 +83,8 @@ private:
     bool imageRandDisplayed[MAX_IMG_N]; // Store information if image was displayed in random mode
     uint32_t randDisplayedN; // Store number of images displayed in random mode
 
-    uint32_t loadImage();
-    uint32_t loadImagePortion();
+    void loadImage();
+    void loadImagePortion();
     void countImages();
     bool checkTouch();
     void getTouch(uint16_t &x, uint16_t &y);
