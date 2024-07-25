@@ -61,11 +61,8 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
 		delay(100);
 	}
 
-	// Loop() will not load image in ONLY_CURRENT mode
-	if (this->currentDispMode == ONLY_CURRENT) {
-		storage->toImage( storage->getImageNumber() );
-		this->loadImage();
-	}
+	// To force image display (for example in ONLY_CURRENT disp mode)
+	this->forceImageDisplay;
 }
 
 void DigitalFrame::loop() {
@@ -78,16 +75,16 @@ void DigitalFrame::loop() {
 	}
 
 	// Display new image only if display time for old image passed
-	if ( (this->forceImageDisplay) || (millis() - this->lastImageDisTime > dispTimeLevels[this->dispTimeLevel]) ) {
+	if ( (!this->forceImageDisplay) && (millis() - this->lastImageDisTime < dispTimeLevels[this->dispTimeLevel]) ) {
 		return;   
 	}
-		
-	this->forceImageDisplay = false;
 
-	// Do not change image in ONLY_CURRENT mode
-	if (this->currentDispMode == ONLY_CURRENT) {
+	// Do not change image in ONLY_CURRENT mode (unless force display)
+	if ( (!this->forceImageDisplay) && (this->currentDispMode == ONLY_CURRENT)) {
 		return;
 	}
+
+	this->forceImageDisplay = false;
 
 	// Choose new image based on current state
 	switch(this->currentDispMode) {
@@ -123,7 +120,7 @@ void DigitalFrame::loop() {
 		}
  
 		case ONLY_CURRENT:
-			// Do not change image
+			storage->toImage( storage->getImageNumber() );
 			break;
 	}
 			
