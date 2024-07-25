@@ -21,6 +21,8 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #include "Calibration/Calibration.h"
 #include "DigitalFrame/DigitalFrame.h"
 
+#define IMAGE_DIR "/images"
+
 // Pin configuration
 #define ILI9486_CS 10
 #define ILI9486_BL 9
@@ -47,7 +49,7 @@ void setup() {
 
 	digitalWrite(ILI9486_CS, 1);
 	digitalWrite(4, 1);
-	storage = new SDStorage(5, display->getWidth(), display->getHeight(), "/images");
+	storage = new SDStorage(5, display->getWidth(), display->getHeight(), IMAGE_DIR);
 	
 	touch = new XPT2046_Touchscreen(XPT2046_CS, XPT2046_IRQ);
 	touch->begin();
