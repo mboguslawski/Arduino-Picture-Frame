@@ -38,12 +38,13 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
 	if (!storage->isOk()) { 
 		this->changeState(SD_ERROR);
 	}
-	
+
 	// Display intro image
 	storage->toImage(INTRO_BMP);
 	this->loadImage();
 	display->setBacklight(255);
-	uint32_t introDispStart = millis();
+	this->lastImageDisTime = millis();
+
 
 	// Load settings while displaying image
 	this->loadSettings();
@@ -56,13 +57,9 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
 	display->changeDefaultBacklight(brightnessLevels[brightnessLevel]);
 	display->setDefaultBacklight();
 
-	// Wait for rest of intro display
-	while(INTRO_DISPLAY_TIME >= (millis() - introDispStart) ) {
+	while (INTRO_DISPLAY_TIME > millis() - this->lastImageDisTime) {
 		delay(100);
 	}
-
-	// To force image display (for example in ONLY_CURRENT disp mode)
-	this->forceImageDisplay;
 }
 
 void DigitalFrame::loop() {
