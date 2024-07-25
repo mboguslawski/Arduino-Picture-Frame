@@ -57,9 +57,8 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
 	display->changeDefaultBacklight(brightnessLevels[brightnessLevel]);
 	display->setDefaultBacklight();
 
-	while (INTRO_DISPLAY_TIME > millis() - this->lastImageDisTime) {
-		delay(100);
-	}
+	// Wait to the end of intro display time
+	delay(INTRO_DISPLAY_TIME - (millis() - this->lastImageDisTime) );
 }
 
 void DigitalFrame::loop() {
