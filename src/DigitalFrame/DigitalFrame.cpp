@@ -39,13 +39,6 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
 		this->changeState(SD_ERROR);
 	}
 
-	// Display intro image
-	storage->toImage(INTRO_BMP);
-	this->loadImage();
-	display->setBacklight(255);
-	this->lastImageDisTime = millis();
-
-
 	// Load settings while displaying image
 	this->loadSettings();
 	this->countImages();
@@ -54,11 +47,13 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
 	// Electric noise will cause to generate different seed values
 	randomSeed(analogRead(A0));
 
+	storage->toImage(INTRO_BMP);
+	this->loadImage();
 	display->changeDefaultBacklight(brightnessLevels[brightnessLevel]);
 	display->setDefaultBacklight();
 
 	// Wait to the end of intro display time
-	delay(INTRO_DISPLAY_TIME - (millis() - this->lastImageDisTime) );
+	delay(INTRO_DISPLAY_TIME);
 }
 
 void DigitalFrame::loop() {
