@@ -32,13 +32,16 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #define BRIGHTNESS_BMP "b.bmp"
 #define DISP_TIME_BMP "t.bmp"
 #define DISP_MODE_BMP "o.bmp"
+#define SET_TURN_OFF_BMP "f.bmp"
 
 #define MAX_IMG_N 256 // Maximum number of images in directory (used for mageRandDisplayed array)
 
 #define IMG_BUFFER 40 // Loading image buffer size in pixels
 #define INTRO_DISPLAY_TIME 5000 // Time of intro display in miliseconds
 #define TOUCH_DELAY 500
-#define BUFFER_LOAD_TIMES 5 // How many last load times to store
+
+#define TURN_OFF_TIMES 5
+constexpr uint32_t turnOffTimes[TURN_OFF_TIMES] = {300000, 900000, 1800000, 2700000, 3600000};
 
 #define DISP_TIME_LEVELS 5
 #define DEFAULT_DISP_TIME_LEVEL 2
@@ -55,6 +58,8 @@ public:
         SET_BRIGHTNESS,
         SET_DISP_TIME,
         SET_DISP_MODE,
+        SET_TURN_OFF,
+        SLEEP,
         SD_ERROR
     };
     
@@ -80,8 +85,11 @@ private:
     uint32_t lastImageDisTime; // Time of last image display
     uint32_t lastTouchTime; // Time of last touch
     uint32_t randDisplayedN; // Store number of images displayed in random mode
+    uint32_t turnOffTime; // Scheduled turn off time
     uint8_t brightnessLevel; // Current brightness level
     uint8_t dispTimeLevel; // Single image display time
+    uint8_t turnOffTimeLevel; // Currently displayed time for turn off schedule
+    bool turnOffScheduled; // True if turn off was scheduled
     bool forceImageDisplay; // Force image display, do not look on display time
     bool imageRandDisplayed[MAX_IMG_N]; // Store information if image was displayed in random mode
 
@@ -100,7 +108,8 @@ private:
     void handleMenuTouch(uint16_t x, uint16_t y); // Handle screen touch while menu display
     void handleSetBrightnessTouch(uint16_t x, uint16_t y); // Handle screen touch while setting brightness
     void handleSetDispTimeTouch(uint16_t x, uint16_t y); // Handle screen touch while setting display time
-    void handleSetDispModeTouch(uint16_t x, uint16_t y); // // Handle screen touch while setting display mode
+    void handleSetDispModeTouch(uint16_t x, uint16_t y); // Handle screen touch while setting display mode
+    void handleSetTurnOffTimeTouch(uint16_t x, uint16_t y); // Handle screen touch while scheduling turn off
 
     void saveSettings();
     void loadSettings();

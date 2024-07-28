@@ -28,8 +28,10 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
 	storage(storage),
 	lastImageDisTime(0),
 	lastTouchTime(0),
+	turnOffTime(0),
 	brightnessLevel(BRIGHTNESS_LEVELS - 1),
 	dispTimeLevel(DEFAULT_DISP_TIME_LEVEL),
+	turnOffScheduled(false),
 	forceImageDisplay(true),
 	imageRandDisplayed({}),
 	randDisplayedN(0)
@@ -57,8 +59,17 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
 }
 
 void DigitalFrame::loop() {
+	// Check for turn off time if scheduled
+	if ( (this->turnOffScheduled) && (millis() >= this->turnOffTime) ) {
+		this->changeState(SLEEP);
+	}
+	
 	// Check if touch occurred
 	this->checkTouch();
+
+	if (this->currentState == SLEEP) {
+		delay(50);
+	}
 
 	// Only check touch if not loading new images
 	if (this->currentState != IMAGE_DISPLAY) { 
@@ -189,17 +200,29 @@ bool DigitalFrame::checkTouch() {
 		case IMAGE_DISPLAY:
 			this->changeState(MENU_DISPLAY);
 			break;
+
 		case MENU_DISPLAY:
 			this->handleMenuTouch(x, y);
 			break;
+
 		case SET_BRIGHTNESS:
 			this->handleSetBrightnessTouch(x, y);
 			break;
+
 		case SET_DISP_TIME:
 			this->handleSetDispTimeTouch(x, y);
 			break;
+
 		case SET_DISP_MODE:
 			this->handleSetDispModeTouch(x, y);
+			break;
+
+		case SET_TURN_OFF:
+			this->handleSetTurnOffTimeTouch(x, y);
+			break;
+		
+		case SLEEP:
+			this->changeState(IMAGE_DISPLAY);
 			break;
 	}
 
@@ -220,32 +243,60 @@ void DigitalFrame::changeState(State newState) {
 		this->saveSettings();
 	}
 	
-	display->clear();
+	if (newState != SLEEP ) {
+		display->clear();
+	}
+
+	if (currentState == SLEEP) {
+		display->setDefaultBacklight();
+	}
+
 	this->currentState = newState;
 
 	switch(newState) {
 		case IMAGE_DISPLAY:
 			this->forceImageDisplay = true;
 			break;
+
 		case MENU_DISPLAY:
 			storage->toImage(MENU_BMP);
 			this->loadImage();
 			break;
+
 		case SET_BRIGHTNESS:
 			storage->toImage(BRIGHTNESS_BMP);
 			this->loadImage();
 			this->displayLevel(this->brightnessLevel, BRIGHTNESS_LEVELS);
 			break;
+
 		case SET_DISP_TIME:
 			storage->toImage(DISP_TIME_BMP);
 			this->loadImage();
 			this->displayTime(dispTimeLevels[this->dispTimeLevel]);
 			break;
+
 		case SET_DISP_MODE:
 			storage->toImage(DISP_MODE_BMP);
 			this->loadImage();
 			this->displaySelected((uint8_t)this->currentDispMode);
 			break;
+
+		case SET_TURN_OFF:
+			storage->toImage(SET_TURN_OFF_BMP);
+			this->loadImage();
+			this->turnOffTimeLevel = 0;
+			this->displayTime(turnOffTimes[this->turnOffTimeLevel]);
+			break;
+
+		case SLEEP:
+		this->turnOffScheduled = false;
+			// Dim screen and turn off backlight
+			for (int i  = display->getDefaultBacklight(); i > -1; i--) {
+				display->setBacklight(i);
+				delay(50);
+			}
+			break;
+
 		case SD_ERROR:
 			display->setBacklight(255);
 			this->displayStorageError();
@@ -256,18 +307,23 @@ void DigitalFrame::changeState(State newState) {
 
 void DigitalFrame::handleMenuTouch(uint16_t x, uint16_t y) {
 	// Touch on set brightness option
-	if (y > 360) {
+	if (y > 384) {
 		this->changeState(SET_BRIGHTNESS);
 	}
 
 	// Touch on set display time option
-	else if (y > 240) {
+	else if (y > 288) {
 		this->changeState(SET_DISP_TIME);
 	}
 
 	// Touch on set display mode option
-	else if (y > 120) {
+	else if (y > 192) {
 		this->changeState(SET_DISP_MODE);
+	}
+
+	// Touch on schedule turn off option
+	else if (y > 96) {
+		this->changeState(SET_TURN_OFF);
 	}
 
 	// Touch on go back option
@@ -435,6 +491,40 @@ void DigitalFrame::handleSetDispModeTouch(uint16_t x, uint16_t y) {
 	// If mode changed
 	if (y > 120) {
 		this->displaySelected((uint8_t)this->currentDispMode);
+	}
+}
+
+void DigitalFrame::handleSetTurnOffTimeTouch(uint16_t x, uint16_t y) {
+	// Touch on later option
+	if (y > 360) {
+		this->turnOffTimeLevel++;
+		this->turnOffTimeLevel %= TURN_OFF_TIMES;
+	}
+
+	// Touch on displayed time
+	else if (y > 240) {}
+
+	// Touch on earlier option
+	else if (y > 120) {
+		this->turnOffTimeLevel--;
+		this->turnOffTimeLevel %= TURN_OFF_TIMES;
+	}
+
+	// Touch on go back option
+	else if (x < 160) {
+		this->changeState(IMAGE_DISPLAY);
+	}
+
+	// Touch on schedule option
+	else if (x >= 160) {
+		this->turnOffScheduled = true;
+		this->turnOffTime = millis() + turnOffTimes[this->turnOffTimeLevel];
+		this->changeState(IMAGE_DISPLAY);
+	}
+
+	// If mode changed
+	if (y > 120) {
+		this->displayTime(turnOffTimes[this->turnOffTimeLevel]);
 	}
 }
 
