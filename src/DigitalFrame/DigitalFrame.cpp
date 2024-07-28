@@ -62,7 +62,9 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
 
 void DigitalFrame::loop() {
 	// Check if touch occurred
-	this->touched();
+	if (this->touched()) {
+		this->handleTouch();
+	}
 
 	// Check of sd errors
 	if ( (storage->error()) && (this->state != SD_ERROR) ) {
@@ -141,7 +143,10 @@ void DigitalFrame::moveToNextImg() {
 	// Load image by portions and check for touch in the meantime
 	for (uint32_t i = 0; i < display->getSize() / IMG_BUFFER; i++) {
 		this->loadImagePortion();
-		if (touched()) { break; }
+		if (this->touched()) { 
+			this->handleTouch();
+			break; 
+		}
 	}
 
 	//  If image fully loaded
@@ -184,11 +189,10 @@ bool DigitalFrame::touched() {
 	// To prevent multi-touches 
 	if (millis() - lastTouchTime < TOUCH_DELAY) { return false; }
 	
-	bool touched = (touch->tirqTouched() && touch->touched());
+	return (touch->tirqTouched() && touch->touched());
+}
 
-	if (!touched) { return false; }
-
-	// If touch occurred
+void DigitalFrame::handleTouch() {
 	uint16_t x, y;
 	this->getTouchPos(x, y);
 	lastTouchTime = millis();
@@ -228,8 +232,6 @@ bool DigitalFrame::touched() {
 			this->reset();
 			break;
 	}
-
-	return true;
 }
 
 void DigitalFrame::getTouchPos(uint16_t &x, uint16_t &y) {
