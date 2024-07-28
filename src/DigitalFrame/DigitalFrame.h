@@ -40,15 +40,15 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #define INTRO_DISPLAY_TIME 5000 // Time of intro display in miliseconds
 #define TOUCH_DELAY 500
 
-#define TURN_OFF_TIMES 5
-constexpr uint32_t turnOffTimes[TURN_OFF_TIMES] = {300000, 900000, 1800000, 2700000, 3600000};
+#define TURN_OFF_TIMES_N 5
+constexpr uint32_t turnOffTimes[TURN_OFF_TIMES_N] = {300000, 900000, 1800000, 2700000, 3600000};
 
-#define DISP_TIME_LEVELS 5
+#define DISP_TIME_LEVEL_N 5
 #define DEFAULT_DISP_TIME_LEVEL 2
-constexpr uint32_t dispTimeLevels[DISP_TIME_LEVELS] = {5000, 30000, 60000, 300000, 600000};
+constexpr uint32_t dispTimeLvls[DISP_TIME_LEVEL_N] = {5000, 30000, 60000, 300000, 600000};
 
-#define BRIGHTNESS_LEVELS 4
-constexpr uint8_t brightnessLevels[BRIGHTNESS_LEVELS] = {10, 40, 90, 255};
+#define BRIGHTNESS_LEVELS_N 4
+constexpr uint8_t brightnessLvls[BRIGHTNESS_LEVELS_N] = {10, 40, 90, 255};
 
 class DigitalFrame {
 public:
@@ -79,16 +79,16 @@ private:
     XPT2046_Touchscreen *touch;
     Calibration *calibration;
     SDStorage *storage;
-    State currentState; // Program state
-    DispMode currentDispMode;
+    State state; // Program state
+    DispMode dispMode;
     uint32_t imageNumberInDir; // Number of images in directory
     uint32_t randDisplayedN; // Store number of images displayed in random mode
     uint32_t lastImageDisTime; // Time of last image display
     uint32_t lastTouchTime; // Time of last touch
     uint32_t turnOffTime; // Scheduled turn off time
-    uint8_t brightnessLevel; // Current brightness level
-    uint8_t dispTimeLevel; // Single image display time
-    uint8_t turnOffTimeLevel; // Currently displayed time for turn off schedule
+    uint8_t brightnessLvl; // Current brightness level
+    uint8_t dispTimeLvl; // Single image display time
+    uint8_t turnOffTimeLvl; // Currently displayed time for turn off schedule
     bool turnOffScheduled; // True if turn off was scheduled
     bool forceImageDisplay; // Force image display, do not look on display time
     bool imageRandDisplayed[MAX_IMG_N]; // Store information if image was displayed in random mode
@@ -97,14 +97,14 @@ private:
     void loadImage();
     void loadImagePortion();
     void countImages();
-    bool checkTouch();
-    void getTouch(uint16_t &x, uint16_t &y);
+    bool touched();
+    void getTouchPos(uint16_t &x, uint16_t &y);
     void changeState(State newState);
 
-    void displayLevel(uint8_t level, uint8_t max); // Display menu to set brightness
-    void displaySelected(uint8_t selected);
-    void displayTime(uint32_t time);
-    void displayStorageError();
+    void dispLevel(uint8_t level, uint8_t max); // Display menu to set brightness
+    void dispSelected(uint8_t selected);
+    void dispTime(uint32_t time);
+    void dispStorageError();
 
     void handleMenuTouch(uint16_t x, uint16_t y); // Handle screen touch while menu display
     void handleSetBrightnessTouch(uint16_t x, uint16_t y); // Handle screen touch while setting brightness
