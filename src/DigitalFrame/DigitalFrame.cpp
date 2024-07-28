@@ -19,7 +19,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 
 #include "DigitalFrame.h"
 
-DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibration *calibration, SDStorage *storage):
+DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibration *calibration, SDStorage *storage, bool dispIntro):
 	display(display),
 	touch(touch),
 	calibration(calibration),
@@ -51,13 +51,18 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
 	// Electric noise will cause to generate different seed values
 	randomSeed(analogRead(A0));
 
-	storage->toImage(INTRO_BMP);
-	this->loadImage();
+	if (dispIntro) { 
+		storage->toImage(INTRO_BMP);
+		this->loadImage();
+	}
+
 	display->changeDefaultBacklight(brightnessLvls[brightnessLvl]);
 	display->setDefaultBacklight();
 
-	// Wait to the end of intro display time
-	delay(INTRO_DISPLAY_TIME);
+	if (dispIntro) {
+		// Wait to the end of intro display time
+		delay(INTRO_DISPLAY_TIME);
+	}
 }
 
 void DigitalFrame::loop() {

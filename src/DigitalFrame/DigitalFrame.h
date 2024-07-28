@@ -69,7 +69,7 @@ public:
         ONLY_CURRENT = 2
     };
 
-    DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibration *calibration, SDStorage *storage);
+    DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibration *calibration, SDStorage *storage, bool dispIntro = true);
 
     void(* reset) (void) = 0; // Calling this function will reset arduino
     void loop(); // This method must be called in arduino loop function
