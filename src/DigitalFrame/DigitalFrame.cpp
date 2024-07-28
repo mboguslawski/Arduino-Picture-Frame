@@ -38,7 +38,7 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
 	imageRandDisplayed({})
 {
 	// Check if sd card initialized correctly
-	if (!storage->isOk()) { 
+	if (storage->error()) { 
 		this->changeState(SD_ERROR);
 		return;
 	}
@@ -65,7 +65,7 @@ void DigitalFrame::loop() {
 	this->checkTouch();
 
 	// Check of sd errors
-	if ( (!storage->isOk()) && (this->currentState != SD_ERROR) ) {
+	if ( (storage->error()) && (this->currentState != SD_ERROR) ) {
 		this->changeState(SD_ERROR);
 	}
 

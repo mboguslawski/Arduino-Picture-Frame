@@ -42,11 +42,11 @@ public:
     void saveSettings(uint8_t *settings, uint16_t nBytes);
     void loadSettings(uint8_t *settings, uint16_t nBytes); 
 
-    bool isOk();
+    bool error();
 private:
     File imageDir; // Directory with images
     File currentImage;
-    bool error; // True if SD card was not initialized or could not open file
+    bool err; // True if SD card was not initialized or could not open file
     uint16_t imageNumber;
     uint16_t disWidth; // Display width [px]
     uint16_t disHeight; // Display height [px]

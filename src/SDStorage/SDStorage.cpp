@@ -20,7 +20,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #include "SDStorage.h"
 
 SDStorage::SDStorage(uint8_t SD_CS_PIN, uint16_t disWidth, uint16_t disHeight, String imageDir):
-    error(false),
+    err(false),
     imageNumber(UINT16_MAX),
     disWidth(disWidth),
     disHeight(disHeight)
@@ -28,10 +28,10 @@ SDStorage::SDStorage(uint8_t SD_CS_PIN, uint16_t disWidth, uint16_t disHeight, S
     // Initialize SD card
     pinMode(SD_CS_PIN, OUTPUT);
     digitalWrite(SD_CS_PIN, 1);
-    error = !SD.begin(SD_CS_PIN);
+    err = !SD.begin(SD_CS_PIN);
 
     // Do not open directories if not initialized (SD card not inserted?)
-    if (error) {return; }
+    if (err) {return; }
 
     this->imageDir = SD.open(imageDir);
     this->nextImage();
@@ -45,8 +45,8 @@ uint16_t SDStorage::getImageNumber() {
     return this->imageNumber;
 }
 
-bool SDStorage::isOk() {
-    return !this->error;
+bool SDStorage::error() {
+    return this->err;
 }
 
 uint16_t SDStorage::nextImage() {
@@ -65,7 +65,7 @@ uint16_t SDStorage::nextImage() {
         }
 
         if (this->currentImage == NULL) {
-            this->error = true;
+            this->err = true;
             return;
         }
 
@@ -82,7 +82,7 @@ bool SDStorage::toImage(String image) {
     this->currentImage = SD.open(image);
     
     if (this->currentImage == NULL) {
-        this->error = true;
+        this->err = true;
     }
     
     return this->validateImage(this->currentImage);
@@ -109,7 +109,7 @@ void SDStorage::readImagePortion(uint16_t *buffer, uint16_t size) {
     int err = this->currentImage.read(pixels, size*3);
 
     if (err == -1) {
-        this->error = true;
+        this->err = true;
         return;
     }
     
