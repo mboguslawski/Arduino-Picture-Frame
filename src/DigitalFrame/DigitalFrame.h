@@ -71,8 +71,13 @@ public:
 
     DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibration *calibration, SDStorage *storage);
 
-    void loop(); // This method must be called in arduino loop function
     void(* reset) (void) = 0; // Calling this function will reset arduino
+    void loop(); // This method must be called in arduino loop function
+    void moveToNextImg(); // Move to next image based on current display mode
+    void loadImage(); // Load currently selected image into screen
+    void loadImagePortion(); // Load IMG_BUFFER pixels of currently selected images into screen
+    void changeState(State newState); // Change current state
+    void handleTouch(); // Main touch handler
 
 private:
     ILI9486 *display;
@@ -93,20 +98,15 @@ private:
     bool forceImageDisplay; // Force image display, do not look on display time
     bool imageRandDisplayed[MAX_IMG_N]; // Store information if image was displayed in random mode
 
-    void moveToNextImg();
-    void loadImage();
-    void loadImagePortion();
     void countImages();
     bool touched();
     void getTouchPos(uint16_t &x, uint16_t &y);
-    void changeState(State newState);
 
     void dispLevel(uint8_t level, uint8_t max); // Display menu to set brightness
     void dispSelected(uint8_t selected);
     void dispTime(uint32_t time);
     void dispStorageError();
 
-    void handleTouch(); // Main touch handler
     void handleMenuTouch(uint16_t x, uint16_t y); // Handle screen touch while menu display
     void handleSetBrightnessTouch(uint16_t x, uint16_t y); // Handle screen touch while setting brightness
     void handleSetDispTimeTouch(uint16_t x, uint16_t y); // Handle screen touch while setting display time
