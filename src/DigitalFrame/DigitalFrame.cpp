@@ -245,14 +245,19 @@ void DigitalFrame::changeState(State newState) {
 	if ( (this->currentState == SET_BRIGHTNESS) || (this->currentState == SET_DISP_TIME) || (this->currentState == SET_DISP_MODE) ) {
 		this->saveSettings();
 	}
-	
-	if (newState != SLEEP ) {
+
+	// Prepare screen for state change
+	if (currentState == SLEEP ) {
+		for (uint8_t i = 0 ; i < display->getDefaultBacklight(); i++) {
+			display->setBacklight(i);
+			delay(10);
+		}
+	}
+
+	if ( (newState != SLEEP) && (currentState != SLEEP) ) {
 		display->clear();
 	}
 
-	if (currentState == SLEEP) {
-		display->setDefaultBacklight();
-	}
 
 	this->currentState = newState;
 
@@ -292,11 +297,11 @@ void DigitalFrame::changeState(State newState) {
 			break;
 
 		case SLEEP:
-		this->turnOffScheduled = false;
+			this->turnOffScheduled = false;
 			// Dim screen and turn off backlight
 			for (int i  = display->getDefaultBacklight(); i > -1; i--) {
 				display->setBacklight(i);
-				delay(50);
+				delay(10);
 			}
 			break;
 
