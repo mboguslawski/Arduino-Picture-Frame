@@ -34,7 +34,7 @@ public:
     bool toImage(String imageFile); // Go to specific image
     bool toImage(uint16_t imagePos);
 
-    bool readImagePortion(uint16_t *buffer, uint16_t size); // Load portion of image into buffer
+    void readImagePortion(uint16_t *buffer, uint16_t size); // Load portion of image into buffer
 
     File getCurrentImage(); // Get current image object
     uint16_t getImageNumber();
@@ -46,7 +46,7 @@ public:
 private:
     File imageDir; // Directory with images
     File currentImage;
-    bool initialized; // True if SD card was initialized without errors
+    bool error; // True if SD card was not initialized or could not open file
     uint16_t imageNumber;
     uint16_t disWidth; // Display width [px]
     uint16_t disHeight; // Display height [px]

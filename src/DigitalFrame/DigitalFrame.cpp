@@ -20,25 +20,27 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #include "DigitalFrame.h"
 
 DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibration *calibration, SDStorage *storage):
-	currentState(IMAGE_DISPLAY),
-	currentDispMode(RANDOM),
 	display(display),
 	touch(touch),
 	calibration(calibration),
 	storage(storage),
+	currentState(IMAGE_DISPLAY),
+	currentDispMode(RANDOM),
+	randDisplayedN(0),
 	lastImageDisTime(0),
 	lastTouchTime(0),
 	turnOffTime(0),
 	brightnessLevel(BRIGHTNESS_LEVELS - 1),
 	dispTimeLevel(DEFAULT_DISP_TIME_LEVEL),
+	turnOffTimeLevel(0),
 	turnOffScheduled(false),
 	forceImageDisplay(true),
-	imageRandDisplayed({}),
-	randDisplayedN(0)
+	imageRandDisplayed({})
 {
 	// Check if sd card initialized correctly
 	if (!storage->isOk()) { 
 		this->changeState(SD_ERROR);
+		return;
 	}
 
 	// Load settings while displaying image
@@ -59,13 +61,18 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
 }
 
 void DigitalFrame::loop() {
+	// Check if touch occurred
+	this->checkTouch();
+
+	// Check of sd errors
+	if ( (!storage->isOk()) && (this->currentState != SD_ERROR) ) {
+		this->changeState(SD_ERROR);
+	}
+
 	// Check for turn off time if scheduled
 	if ( (this->turnOffScheduled) && (millis() >= this->turnOffTime) ) {
 		this->changeState(SLEEP);
 	}
-	
-	// Check if touch occurred
-	this->checkTouch();
 
 	if (this->currentState == SLEEP) {
 		delay(50);
@@ -87,7 +94,10 @@ void DigitalFrame::loop() {
 	}
 
 	this->forceImageDisplay = false;
+	this->moveToNextImg();
+}
 
+void DigitalFrame::moveToNextImg() {
 	// Choose new image based on current state
 	switch(this->currentDispMode) {
 		case IN_ORDER:
@@ -146,13 +156,7 @@ void DigitalFrame::loadImage() {
 	// Load image into display
 	display->openWindow(0, 0, display->getWidth(), display->getHeight());
 	for (uint32_t i = 0; i < display->getSize() / IMG_BUFFER; i++) {
-		bool ok = storage->readImagePortion(buffer, IMG_BUFFER);
-		
-		// If error while reading from sd
-		if (!ok) {
-			this->changeState(SD_ERROR);
-		}
-		
+		storage->readImagePortion(buffer, IMG_BUFFER);
 		display->writeBuffer(buffer, IMG_BUFFER);
 	}
 }
@@ -161,13 +165,7 @@ void DigitalFrame::loadImagePortion() {
 	uint16_t buffer[IMG_BUFFER];
 
 	// Load only one portion
-	bool ok = storage->readImagePortion(buffer, IMG_BUFFER);
-
-	// If error while reading from sd
-	if (!ok) {
-		this->changeState(SD_ERROR);
-	}
-
+	storage->readImagePortion(buffer, IMG_BUFFER);
 	display->writeBuffer(buffer, IMG_BUFFER);
 }
 
@@ -223,6 +221,11 @@ bool DigitalFrame::checkTouch() {
 		
 		case SLEEP:
 			this->changeState(IMAGE_DISPLAY);
+			break;
+
+		case SD_ERROR:
+			display->turnOffBacklight();
+			this->reset();
 			break;
 	}
 
@@ -300,7 +303,6 @@ void DigitalFrame::changeState(State newState) {
 		case SD_ERROR:
 			display->setBacklight(255);
 			this->displayStorageError();
-			while(1){} // Suspend on sd error
 			break;
 	}
 }
@@ -407,6 +409,7 @@ void DigitalFrame::displayStorageError() {
 	display->drawLine(80, 120, display->getWidth()-80, display->getHeight()-120, ILI9486_RED);
 	display->drawLine(80, display->getHeight()-120, display->getWidth()-80, 120, ILI9486_RED);
 	display->drawString(70, 400, "SD card error", ILI9486::L, ILI9486_RED);
+	display->drawString(70, 80, "Tap to reboot", ILI9486::L, ILI9486_RED);
 }
 
 void DigitalFrame::handleSetBrightnessTouch(uint16_t x, uint16_t y) {

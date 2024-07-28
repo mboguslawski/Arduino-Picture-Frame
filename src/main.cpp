@@ -44,7 +44,6 @@ SDStorage *storage;
 DigitalFrame *frame;
 
 void setup() {
-	Serial.begin(9600);
 	display = new ILI9486(ILI9486_CS, ILI9486_BL, ILI9486_RST, ILI9486_DC, ILI9486::R2L_U2D, 0, ILI9486_BLACK);
 
 	digitalWrite(ILI9486_CS, 1);

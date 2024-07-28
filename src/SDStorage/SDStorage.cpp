@@ -20,7 +20,7 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #include "SDStorage.h"
 
 SDStorage::SDStorage(uint8_t SD_CS_PIN, uint16_t disWidth, uint16_t disHeight, String imageDir):
-    initialized(false),
+    error(false),
     imageNumber(UINT16_MAX),
     disWidth(disWidth),
     disHeight(disHeight)
@@ -28,10 +28,10 @@ SDStorage::SDStorage(uint8_t SD_CS_PIN, uint16_t disWidth, uint16_t disHeight, S
     // Initialize SD card
     pinMode(SD_CS_PIN, OUTPUT);
     digitalWrite(SD_CS_PIN, 1);
-    initialized = SD.begin(SD_CS_PIN);
+    error = !SD.begin(SD_CS_PIN);
 
     // Do not open directories if not initialized (SD card not inserted?)
-    if (!initialized) {return; }
+    if (error) {return; }
 
     this->imageDir = SD.open(imageDir);
     this->nextImage();
@@ -46,7 +46,7 @@ uint16_t SDStorage::getImageNumber() {
 }
 
 bool SDStorage::isOk() {
-    return this->initialized;
+    return !this->error;
 }
 
 uint16_t SDStorage::nextImage() {
@@ -64,6 +64,11 @@ uint16_t SDStorage::nextImage() {
             this->imageNumber = 0;
         }
 
+        if (this->currentImage == NULL) {
+            this->error = true;
+            return;
+        }
+
         if (this->validateImage(this->currentImage)) { break; }
         skipped++;
     }
@@ -75,6 +80,11 @@ uint16_t SDStorage::nextImage() {
 bool SDStorage::toImage(String image) {
     this->currentImage.close();
     this->currentImage = SD.open(image);
+    
+    if (this->currentImage == NULL) {
+        this->error = true;
+    }
+    
     return this->validateImage(this->currentImage);
 }
 
@@ -94,19 +104,18 @@ uint16_t SDStorage::RGB24ToRGB16(uint8_t r, uint8_t g, uint8_t b) {
     return (( (r) >> 3 ) << 11 ) | (( (g) >> 2 ) << 5) | ( (b) >> 3);
 }
 
-bool SDStorage::readImagePortion(uint16_t *buffer, uint16_t size) {
+void SDStorage::readImagePortion(uint16_t *buffer, uint16_t size) {
     uint8_t pixels[size*3];
     int err = this->currentImage.read(pixels, size*3);
 
     if (err == -1) {
-        return false;
+        this->error = true;
+        return;
     }
     
     for (uint16_t i  = 0; i < size; i++) {
         buffer[i] = this->RGB24ToRGB16(pixels[i*3 + 2], pixels[i*3 + 1], pixels[i*3 + 0]);
     }
-
-    return true;
 }
 
 

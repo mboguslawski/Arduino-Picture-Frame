@@ -72,19 +72,19 @@ public:
     DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibration *calibration, SDStorage *storage);
 
     void loop(); // This method must be called in arduino loop function
+    void(* reset) (void) = 0; // Calling this function will reset arduino
 
 private:
-    State currentState; // Program state
-    DispMode currentDispMode;
     ILI9486 *display;
     XPT2046_Touchscreen *touch;
     Calibration *calibration;
     SDStorage *storage;
-
+    State currentState; // Program state
+    DispMode currentDispMode;
     uint32_t imageNumberInDir; // Number of images in directory
+    uint32_t randDisplayedN; // Store number of images displayed in random mode
     uint32_t lastImageDisTime; // Time of last image display
     uint32_t lastTouchTime; // Time of last touch
-    uint32_t randDisplayedN; // Store number of images displayed in random mode
     uint32_t turnOffTime; // Scheduled turn off time
     uint8_t brightnessLevel; // Current brightness level
     uint8_t dispTimeLevel; // Single image display time
@@ -93,6 +93,7 @@ private:
     bool forceImageDisplay; // Force image display, do not look on display time
     bool imageRandDisplayed[MAX_IMG_N]; // Store information if image was displayed in random mode
 
+    void moveToNextImg();
     void loadImage();
     void loadImagePortion();
     void countImages();
