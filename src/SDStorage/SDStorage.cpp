@@ -35,6 +35,8 @@ SDStorage::SDStorage(uint8_t SD_CS_PIN, uint16_t disWidth, uint16_t disHeight, S
 
     this->imageDir = SD.open(imageDir);
     this->nextImage();
+
+    this->countImages();
 }
 
 File SDStorage::getCurrentImage() {
@@ -43,6 +45,21 @@ File SDStorage::getCurrentImage() {
 
 uint16_t SDStorage::getImageNumber() {
     return this->imageNumber;
+}
+
+uint32_t SDStorage::imagesInDir() {
+    return this->imagesInDirN;
+}
+
+void SDStorage::countImages() {
+	this->imagesInDirN = 0;
+
+	// Count images until same image occurred after directory rewind
+	String name = this->getCurrentImage().name();
+	do {
+		imagesInDirN++;
+		this->nextImage();
+	} while (name != this->getCurrentImage().name());
 }
 
 bool SDStorage::error() {

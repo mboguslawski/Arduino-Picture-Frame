@@ -86,7 +86,6 @@ private:
     SDStorage *storage;
     State state; // Program state
     DispMode dispMode;
-    uint32_t imageNumberInDir; // Number of images in directory
     uint32_t randDisplayedN; // Store number of images displayed in random mode
     uint32_t lastImageDisTime; // Time of last image display
     uint32_t lastTouchTime; // Time of last touch
@@ -98,7 +97,6 @@ private:
     bool forceImageDisplay; // Force image display, do not look on display time
     bool imageRandDisplayed[MAX_IMG_N]; // Store information if image was displayed in random mode
 
-    void countImages();
     bool touched();
     void getTouchPos(uint16_t &x, uint16_t &y);
 

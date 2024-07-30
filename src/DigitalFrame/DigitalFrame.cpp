@@ -42,10 +42,8 @@ DigitalFrame::DigitalFrame(ILI9486 *display, XPT2046_Touchscreen *touch, Calibra
 		this->changeState(SD_ERROR);
 		return;
 	}
-
-	// Load settings while displaying image
+	
 	this->loadSettings();
-	this->countImages();
 
 	// Pin A0 is unconnected
 	// Electric noise will cause to generate different seed values
@@ -113,7 +111,7 @@ void DigitalFrame::moveToNextImg() {
 
 		case RANDOM: {
 			// Pick random image from those not displayed recently
-			uint16_t imageN = random(this->imageNumberInDir - this->randDisplayedN);
+			uint16_t imageN = random(storage->imagesInDir() - this->randDisplayedN);
 			// Find image not displayed recently
 			uint16_t notDisp = imageN;
 			uint16_t index = 0;
@@ -129,7 +127,7 @@ void DigitalFrame::moveToNextImg() {
 			this->randDisplayedN++;
 
 			// If all recently displayed, reset 
-			if (this->randDisplayedN >= this->imageNumberInDir) {
+			if (this->randDisplayedN >= this->storage->imagesInDir()) {
 				this->randDisplayedN = 0;
 				for (uint32_t i = 0; i < MAX_IMG_N; i++) { this->imageRandDisplayed[i] = false; }
 			}
@@ -177,17 +175,6 @@ void DigitalFrame::loadImagePortion() {
 	// Load only one portion
 	storage->readImagePortion(buffer, IMG_BUFFER);
 	display->writeBuffer(buffer, IMG_BUFFER);
-}
-
-void DigitalFrame::countImages() {
-	this->imageNumberInDir = 0;
-
-	// Count images until same image occurred after directory rewind
-	String name = storage->getCurrentImage().name();
-	do {
-		imageNumberInDir++;
-		storage->nextImage();
-	} while (name != storage->getCurrentImage().name());
 }
 
 bool DigitalFrame::touched() {

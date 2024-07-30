@@ -38,6 +38,7 @@ public:
 
     File getCurrentImage(); // Get current image object
     uint16_t getImageNumber();
+    uint32_t imagesInDir(); // Get number of images in directory with images
 
     void saveSettings(uint8_t *settings, uint16_t nBytes);
     void loadSettings(uint8_t *settings, uint16_t nBytes); 
@@ -46,6 +47,7 @@ public:
 private:
     File imageDir; // Directory with images
     File currentImage;
+    uint32_t imagesInDirN; // Number of images in directory
     bool err; // True if SD card was not initialized or could not open file
     uint16_t imageNumber;
     uint16_t disWidth; // Display width [px]
@@ -53,6 +55,7 @@ private:
 
     uint16_t RGB24ToRGB16(uint8_t r, uint8_t g, uint8_t b); // Convert RGB24 format to RGB 16
     bool validateImage(File &image);
+    void countImages();
     uint32_t readLittleIndian32(File f); // Read data and convert to big indian format
     uint16_t readLittleIndian16(File f); // Read data and convert to big indian format
 };
