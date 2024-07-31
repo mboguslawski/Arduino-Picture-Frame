@@ -34,7 +34,9 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #define DISP_MODE_BMP "o.bmp"
 #define SET_TURN_OFF_BMP "f.bmp"
 
-#define MAX_IMG_N 256 // Maximum number of images in directory (used for mageRandDisplayed array)
+// Number of guaranteed different images displayed in row in random mode
+// Force different images to appear
+#define DIFF_RAND_IMG_N 256
 
 #define IMG_BUFFER 40 // Loading image buffer size in pixels
 #define INTRO_DISPLAY_TIME 5000 // Time of intro display in miliseconds
@@ -95,7 +97,7 @@ private:
     uint8_t turnOffTimeLvl; // Currently displayed time for turn off schedule
     bool turnOffScheduled; // True if turn off was scheduled
     bool forceImageDisplay; // Force image display, do not look on display time
-    bool imageRandDisplayed[MAX_IMG_N]; // Store information if image was displayed in random mode
+    bool imageRandDisplayed[DIFF_RAND_IMG_N]; // Store information if image was displayed in random mode
 
     bool touched();
     void getTouchPos(uint16_t &x, uint16_t &y);

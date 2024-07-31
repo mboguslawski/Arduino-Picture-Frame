@@ -116,20 +116,22 @@ void DigitalFrame::moveToNextImg() {
 			uint16_t notDisp = imageN;
 			uint16_t index = 0;
 			for (uint16_t i = 0; i < imageN + 1; i++) {
-				if (this->imageRandDisplayed[index++]) { 
+				if (this->imageRandDisplayed[index % DIFF_RAND_IMG_N]) { 
 					notDisp++;
 					i--;
 				}
+
+				index++;
 			}
 
 			// Mark image as recently displayed
-			this->imageRandDisplayed[notDisp] = true;
+			this->imageRandDisplayed[notDisp % DIFF_RAND_IMG_N] = true;
 			this->randDisplayedN++;
 
 			// If all recently displayed, reset 
-			if (this->randDisplayedN >= this->storage->imagesInDir()) {
+			if (this->randDisplayedN >= min(this->storage->imagesInDir(), DIFF_RAND_IMG_N) ) {
 				this->randDisplayedN = 0;
-				for (uint32_t i = 0; i < MAX_IMG_N; i++) { this->imageRandDisplayed[i] = false; }
+				for (uint32_t i = 0; i < DIFF_RAND_IMG_N; i++) { this->imageRandDisplayed[i] = false; }
 			}
 
 			storage->toImage(notDisp);
