@@ -45,9 +45,9 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #define TURN_OFF_TIMES_N 5
 constexpr uint32_t turnOffTimes[TURN_OFF_TIMES_N] = {300000, 900000, 1800000, 2700000, 3600000};
 
-#define DISP_TIME_LEVEL_N 5
+#define DISP_TIME_LEVEL_N 8
 #define DEFAULT_DISP_TIME_LEVEL 2
-constexpr uint32_t dispTimeLvls[DISP_TIME_LEVEL_N] = {5000, 30000, 60000, 300000, 600000};
+constexpr uint32_t dispTimeLvls[DISP_TIME_LEVEL_N] = {5000, 30000, 60000, 300000, 600000, 1800000, 2700000, 3600000};
 
 #define BRIGHTNESS_LEVELS_N 4
 constexpr uint8_t brightnessLvls[BRIGHTNESS_LEVELS_N] = {10, 40, 90, 255};
