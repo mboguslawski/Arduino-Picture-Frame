@@ -42,8 +42,8 @@ along with this program.  If not, see https://www.gnu.org/licenses/.
 #define INTRO_DISPLAY_TIME 5000 // Time of intro display in miliseconds
 #define TOUCH_DELAY 500
 
-#define TURN_OFF_TIMES_N 5
-constexpr uint32_t turnOffTimes[TURN_OFF_TIMES_N] = {300000, 900000, 1800000, 2700000, 3600000};
+#define TURN_OFF_TIMES_N 6
+constexpr uint32_t turnOffTimes[TURN_OFF_TIMES_N] = {0, 300000, 900000, 1800000, 2700000, 3600000};
 
 #define DISP_TIME_LEVEL_N 8
 #define DEFAULT_DISP_TIME_LEVEL 2

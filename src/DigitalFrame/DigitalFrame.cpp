@@ -75,7 +75,7 @@ void DigitalFrame::loop() {
 	}
 
 	// Check for turn off time if scheduled
-	if ( (this->turnOffScheduled) && (millis() >= this->turnOffTime) ) {
+	if ( (!this->forceImageDisplay) && (this->turnOffScheduled) && (millis() >= this->turnOffTime) ) {
 		this->changeState(SLEEP);
 	}
 
@@ -369,13 +369,13 @@ void DigitalFrame::dispTime(uint32_t time) {
 	uint16_t digitCount = 0;
 
 	uint32_t tmp = time;
-	while (tmp) {
+	do {
 		digitCount++;
 		tmp /= 10;
-	}
+	} while (tmp);
 
 	uint16_t i = digitCount;
-	while(time) {
+	while(i) {
 		text[i-1] = (time % 10) + '0';
 		time /= 10;
 		i--;
