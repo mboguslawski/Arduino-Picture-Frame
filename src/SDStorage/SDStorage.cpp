@@ -106,15 +106,11 @@ bool SDStorage::toImage(String image) {
 }
 
 bool SDStorage::toImage(uint16_t imagePos) {
-    this->currentImage.close();
-    this->imageDir.rewindDirectory();
-
-    for (uint16_t i = 0; i < imagePos - 1; i++) {
-        this->imageDir.openNextFile().close();
-    }
-
-    this->nextImage();
     this->imageNumber = imagePos;
+
+    String name = this->imageDir.name();
+    name += String('/') + String(imagePos) + ".bmp";
+    return this->toImage(name);
 }
 
 uint16_t SDStorage::RGB24ToRGB16(uint8_t r, uint8_t g, uint8_t b) {
