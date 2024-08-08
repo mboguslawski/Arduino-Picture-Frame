@@ -552,9 +552,24 @@ void DigitalFrame::loadSettings() {
 	this->dispTimeLvl = s[1];
 	this->dispMode = (DispMode)s[2];
 
+	// Ensure values are correct
+	if (this->brightnessLvl >= BRIGHTNESS_LEVELS_N) {
+		this->brightnessLvl = BRIGHTNESS_LEVELS_N - 1;
+	}
+	if (this->dispTimeLvl >= DISP_TIME_LEVEL_N) {
+		this->dispTimeLvl = DISP_TIME_LEVEL_N - 1;
+	}
+
 	// Only ONLY_CURRENT mode uses image number
 	if (dispMode == ONLY_CURRENT) {
 		uint16_t imageN = ((uint16_t)s[3] << 8) | (uint16_t)s[4];
+		
+		// Switch to random mode if image number is incorrect
+		if (imageN >= storage->imagesInDir()) {
+			this->dispMode = RANDOM;
+			return;
+		}
+		
 		storage->toImage(imageN);
 	}
 }

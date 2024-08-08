@@ -209,6 +209,14 @@ void SDStorage::saveSettings(uint8_t *settings, uint16_t nBytes) {
 }
 
 void SDStorage::loadSettings(uint8_t *settings, uint16_t nBytes) {
+    if (!SD.exists(SETTINGS_FILE)) {
+        for (uint16_t i = 0; i < nBytes; i++) {
+            settings[i] = 0;
+        }
+
+        return;
+    } 
+    
     File file = SD.open(SETTINGS_FILE);
 
     file.read(settings, nBytes);
