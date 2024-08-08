@@ -53,10 +53,26 @@ Connection for project:
 
 ![](./doc/circuit.jpg)
 
-Additional led can be put into button and connected to arduino GND and VCC (via resistor). \
+Additional led can be put into button and connected to arduino GND and VCC (via resistor).
 
-Code can be upload to arduino with PlatformIO extension for VSCodium or Arduino IDE.
+Code can be uploaded to Arduino with PlatformIO extension for VSCodium or Arduino IDE.
+
+#### SD card preparation
+
+1. Upload **.bmp** images from [recourses](./recources/ui%20images/) to sd card
+2. Put your images into **/images** folder on sd card
+
+### Image format
+
+Images must be in **24 bit** bmp format (**320px width**, **480px height**) \
+In **/images** folder image name must be a number. \
+For example 5 images must be named as following: \
+0.bmp \
+1.bmp \
+2.bmp \
+3.bmp \
+4.bmp
 
 ## Author
-Mateusz Bogusławski (E: mateusz.boguslawski@ibnet.pl) \
-(Case project) Artur Bogusławski (E: artur.boguslawski@ibnet.pl)
+#### Mateusz Bogusławski (E: mateusz.boguslawski@ibnet.pl)
+##### (Case project) Artur Bogusławski (E: artur.boguslawski@ibnet.pl)
