@@ -43,13 +43,20 @@ Set time after which device will be in sleep mode (screen will be turned off). T
 **LCD screen** https://www.waveshare.com/4inch-tft-touch-shield.html \
 **Arduino Pro Mini 5V** \
 **USB C connector** https://botland.store/protoboard-connector-board-accessories/12658-usb-20-typ-c-connector-for-breadboard-pololu-2585-5904422319823.html \
-**Power button** https://botland.store/switches-with-button/10799-on-off-bistable-switch-pbw-12a-2a-250v--5904422316648.html
+**Power button** https://botland.store/switches-with-button/10799-on-off-bistable-switch-pbw-12a-2a-250v--5904422316648.html  
+**Micro sd card** https://sandisk-store.pl/pl/p/SANDISK-ULTRA-ANDROID-microSDHC-32-GB-100MBs-Class-10-UHS-I/23078721
 
 ## Make one yourself
 
-Case for device can be 3d printed using project available [here](./recources/case%203D%20print%20files/).
+Case for device can be 3d printed using project available [here](./recources/case%203D%20print%20files/). Filament used can be bought [here](https://print-me.pl/sklep/produkty/hobby-design/pla/advanced-matt-pla/advanced-matt-pla-black-200g/).  
+Printing setting:  
+Nozzle temperature: 195 C  
+Bed temperature: 60 C  
+Layer height: 0.1 mm
 
-Connection for project:
+
+
+**Connection for project**:
 
 ![](./doc/circuit.jpg)
 
