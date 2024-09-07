@@ -435,7 +435,7 @@ void DigitalFrame::handleSetBrightnessTouch(uint16_t x, uint16_t y) {
 	
 	// Touch on go back option
 	else {
-		this->changeState(IMAGE_DISPLAY);
+		this->changeState(MENU_DISPLAY);
 	}
 
 	// If brightness level changed
@@ -462,7 +462,7 @@ void DigitalFrame::handleSetDispTimeTouch(uint16_t x, uint16_t y) {
 	
 	// Touch on go back option
 	else {
-		this->changeState(IMAGE_DISPLAY);
+		this->changeState(MENU_DISPLAY);
 	}
 
 	// If disp time changed
@@ -489,7 +489,7 @@ void DigitalFrame::handleSetDispModeTouch(uint16_t x, uint16_t y) {
 
 	// Touch on go back option
 	else {
-		this->changeState(IMAGE_DISPLAY);
+		this->changeState(MENU_DISPLAY);
 	}
 
 	// If mode changed
@@ -516,14 +516,14 @@ void DigitalFrame::handleSetTurnOffTimeTouch(uint16_t x, uint16_t y) {
 
 	// Touch on go back option
 	else if (x < 160) {
-		this->changeState(IMAGE_DISPLAY);
+		this->changeState(MENU_DISPLAY);
 	}
 
 	// Touch on schedule option
 	else if (x >= 160) {
 		this->turnOffScheduled = true;
 		this->turnOffTime = millis() + turnOffTimes[this->turnOffTimeLvl];
-		this->changeState(IMAGE_DISPLAY);
+		this->changeState(MENU_DISPLAY);
 	}
 
 	// If mode changed
